@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Java刷题基础语法 - Hyeee&#039;s Home</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Hyeee&#039;s Home"><meta name="msapplication-TileImage" content="/img/pikachu.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hyeee&#039;s Home"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="一、Java集合概览​	Java 集合， 也叫作容器，主要是由两大接口派生而来：一个是 Collection接口，主要用于存放单一元素；另一个是 Map 接口，主要用于存放键值对。对于Collection 接口，下面又有三个主要的子接口：List、Set 和 Queue。 ​	Java 集合框架如下图所示："><meta property="og:type" content="blog"><meta property="og:title" content="Java刷题基础语法"><meta property="og:url" content="http://hyeee.me/2023/05/01/Java%E5%88%B7%E9%A2%98%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/"><meta property="og:site_name" content="Hyeee&#039;s Home"><meta property="og:description" content="一、Java集合概览​	Java 集合， 也叫作容器，主要是由两大接口派生而来：一个是 Collection接口，主要用于存放单一元素；另一个是 Map 接口，主要用于存放键值对。对于Collection 接口，下面又有三个主要的子接口：List、Set 和 Queue。 ​	Java 集合框架如下图所示："><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://hyeee.me/2023/05/01/Java%E5%88%B7%E9%A2%98%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/java-collection-hierarchy.png"><meta property="article:published_time" content="2023-05-01T14:25:46.000Z"><meta property="article:modified_time" content="2023-05-01T14:25:46.000Z"><meta property="article:author" content="Hyeee"><meta property="article:tag" content="Java"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://hyeee.me/2023/05/01/Java%E5%88%B7%E9%A2%98%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/java-collection-hierarchy.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://hyeee.me/2023/05/01/Java%E5%88%B7%E9%A2%98%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/"},"headline":"Java刷题基础语法","image":["http://hyeee.me/2023/05/01/Java%E5%88%B7%E9%A2%98%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/java-collection-hierarchy.png"],"datePublished":"2023-05-01T14:25:46.000Z","dateModified":"2023-05-01T14:25:46.000Z","author":{"@type":"Person","name":"Hyeee"},"publisher":{"@type":"Organization","name":"Hyeee's Home","logo":{"@type":"ImageObject","url":"http://hyeee.me/img/logo_pikachu.svg"}},"description":"一、Java集合概览​\tJava 集合， 也叫作容器，主要是由两大接口派生而来：一个是 Collection接口，主要用于存放单一元素；另一个是 Map 接口，主要用于存放键值对。对于Collection 接口，下面又有三个主要的子接口：List、Set 和 Queue。 ​\tJava 集合框架如下图所示："}</script><link rel="canonical" href="http://hyeee.me/2023/05/01/Java%E5%88%B7%E9%A2%98%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/"><link rel="icon" href="/img/pikachu.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/archives">时间轴</a><a class="navbar-item" href="/categories">归档</a><a class="navbar-item" href="/tags">标签</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2023-05-01T14:25:46.000Z" title="2023/5/1 22:25:46">2023-05-01</time>发表</span><span class="level-item"><time dateTime="2023-05-01T14:25:46.000Z" title="2023/5/1 22:25:46">2023-05-01</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E8%AF%AD%E8%A8%80/">语言</a></span><span class="level-item">25 分钟读完 (大约3734个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">Java刷题基础语法</h1><div class="content"><h2 id="一、Java集合概览"><a href="#一、Java集合概览" class="headerlink" title="一、Java集合概览"></a>一、Java集合概览</h2><p>​	Java 集合， 也叫作容器，主要是由两大接口派生而来：一个是 <code>Collection</code>接口，主要用于存放单一元素；另一个是 <code>Map</code> 接口，主要用于存放键值对。对于<code>Collection</code> 接口，下面又有三个主要的子接口：<code>List</code>、<code>Set</code> 和 <code>Queue</code>。</p>
+<p>​	Java 集合框架如下图所示：</p>
+<p><img src="/2023/05/01/Java%E5%88%B7%E9%A2%98%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/java-collection-hierarchy.png" alt="Java 集合框架概览"></p>
+<span id="more"></span>
+
+<ul>
+<li><code>List</code>：存储的元素是有序的、可重复的。<ul>
+<li><code>ArrayList</code>：<code>Object[]</code> 数组。</li>
+<li><code>Vector</code>：线程安全，使用 <code>synchronized</code> 进行同步，了解即可。</li>
+<li><code>LinkedList</code>：双向链表(JDK1.6 之前为循环链表，JDK1.7 取消了循环)。</li>
+</ul>
+</li>
+<li><code>Set</code>：存储的元素不可重复的。<ul>
+<li><code>HashSet</code>(无序，唯一): 基于 <code>HashMap</code> 实现的，底层采用 <code>HashMap</code> 来保存元素。</li>
+<li><code>LinkedHashSet</code>: <code>LinkedHashSet</code> 是 <code>HashSet</code> 的子类，并且其内部是通过 <code>LinkedHashMap</code> 来实现的。</li>
+<li><code>TreeSet</code>(有序，唯一): 红黑树(自平衡的排序二叉树)。</li>
+</ul>
+</li>
+<li><code>Queue</code>：按特定的排队规则来确定先后顺序，存储的元素是有序的、可重复的。<ul>
+<li><code>PriorityQueue</code>: <code>Object[]</code> 数组来实现小顶堆。</li>
+<li><code>DelayQueue</code>:<code>PriorityQueue</code>。</li>
+<li><code>ArrayDeque</code>: 可扩容动态双向数组。</li>
+</ul>
+</li>
+<li><code>Map</code>：使用键值对（key-value）存储。key 是无序的、不可重复的，value 是无序的、可重复的，每个键最多映射到一个值。<ul>
+<li><code>HashMap</code>：JDK1.8 以后在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为 8）（将链表转换成红黑树前会判断，如果当前数组的长度小于 64，那么会选择先进行数组扩容，而不是转换为红黑树）时，将链表转化为红黑树，以减少搜索时间。</li>
+<li><code>LinkedHashMap</code>：<code>LinkedHashMap</code> 在 <code>HashMap</code>的基础上，增加了一条双向链表，使得上面的结构可以保持键值对的插入顺序。同时通过对链表进行相应的操作，实现了访问顺序相关逻辑。</li>
+<li><code>Hashtable</code>：数组+链表组成的，数组是 <code>Hashtable</code> 的主体，链表则是主要为了解决哈希冲突而存在的。</li>
+<li><code>TreeMap</code>：红黑树（自平衡的排序二叉树）。</li>
+</ul>
+</li>
+</ul>
+<h2 id="二、常见数据结构及用法"><a href="#二、常见数据结构及用法" class="headerlink" title="二、常见数据结构及用法"></a>二、常见数据结构及用法</h2><h3 id="1-数组"><a href="#1-数组" class="headerlink" title="1. 数组"></a>1. 数组</h3><h4 id="1）赋值"><a href="#1）赋值" class="headerlink" title="1）赋值"></a>1）赋值</h4><ol>
+<li>初始化时直接赋值</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] intArray = <span class="keyword">new</span> <span class="title class_">int</span>[]&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>通过 Java Util 类的 Arrays.fill(arrayname,value)</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] intArray = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">10</span>];</span><br><span class="line"><span class="comment">// Arrays.fill(arrayname, value) </span></span><br><span class="line">Arrays.fill(intArray, <span class="number">100</span>);</span><br><span class="line"><span class="comment">// Arrays.fill(arrayname, starting index, ending index, value) </span></span><br><span class="line">Arrays.fill(intArray, <span class="number">3</span>, <span class="number">6</span>, <span class="number">50</span>);</span><br></pre></td></tr></table></figure>
+
+<p>注：Arrays.fill只能给一维数组赋初值，二维数组需要循环赋值。如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[][] intArray = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">10</span>][<span class="number">10</span>];</span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; intArray.length; ++i) &#123;</span><br><span class="line">	Arrays.fill(intArray[i], <span class="number">100</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2）遍历"><a href="#2）遍历" class="headerlink" title="2）遍历"></a>2）遍历</h4><ol>
+<li>for循环遍历</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; intArray.length; ++i) &#123;</span><br><span class="line">	System.out.println(intArray[i]);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// for-each遍历，与for遍历等价</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> a: intArray) &#123;</span><br><span class="line">	System.out.println(a);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3）数组复制"><a href="#3）数组复制" class="headerlink" title="3）数组复制"></a>3）数组复制</h4><ol>
+<li><strong>直接赋值（没有拷贝）</strong></li>
+</ol>
+<p>intArray2和intArray1是指向同一个数组对象的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] intArray1 = <span class="keyword">new</span> <span class="title class_">int</span>[]&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="type">int</span>[] intArray2 = intArray1;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>System.arraycopy（浅拷贝）</strong></li>
+</ol>
+<p>方法：arraycopy(Object src, int srcPos, Object dest, int destPos, int length)</p>
+<p>返回了一个新的数组对象，但是这两个数组里面的内容都是指向同一个引用的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] intArray1 = <span class="keyword">new</span> <span class="title class_">int</span>[]&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="type">int</span>[] intArray2 = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">5</span>];</span><br><span class="line">System.arraycopy(intArray1, <span class="number">0</span>, intArray2, <span class="number">0</span>, intArray1.length);</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><strong>Arrays.copyOf和Arrays.copyOfRange（浅拷贝）</strong></li>
+</ol>
+<p>方法：copyOf(T[] original, int newLength)和copyOfRange(T[] original, int from, int to)</p>
+<ul>
+<li>如果newLength不合法，即小于0，那么抛出NegativeArraySizeException异常            </li>
+<li>如果newLength小于源数组长度，则复制指定长度的数组元素            </li>
+<li>如果newLength大于源数组长度，则新数组中超出源数组长度的元素则是默认值</li>
+</ul>
+<p>返回了一个新的数组对象，但是这两个数组里面的内容都是指向同一个引用的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] intArray1 = <span class="keyword">new</span> <span class="title class_">int</span>[]&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;</span><br><span class="line"><span class="type">int</span>[] intArray2 = Arrays.copyOf(intArray1, intArray1.length);</span><br><span class="line"><span class="type">int</span>[] intArray3 = Arrays.copyOfRange(intArray1, <span class="number">0</span>, intArray1.length);</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><strong>对象拷贝（Object.clone）</strong></li>
+</ol>
+<p>clone()比较特殊，对于对象而言，它是深拷贝，但是对于数组而言，它是浅拷贝。拷贝数组时会返回一个新的数组对象，但是这两个数组里面的内容都是指向同一个引用的。</p>
+<h4 id="4）Arrays-类"><a href="#4）Arrays-类" class="headerlink" title="4）Arrays 类"></a>4）Arrays 类</h4><p>java.util.Arrays 类能方便地操作数组，它提供的所有方法都是静态的。</p>
+<p>能够给数组赋值、对数组排序、比较数组和查找数组元素。具体如下表：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>int binarySearch(Object[] a, Object key)</strong></td>
+<td>用二分查找算法在给定数组中搜索给定值的对象。数组在调用前必须排序好的。如果查找值包含在数组中，则返回搜索键的索引；否则返回 (-(<em>插入点</em>) - 1)。也可以调用**binarySearch(Object[], int fromIndex, int toIndex, Object key)**在指定位置查找给定值。</td>
+</tr>
+<tr>
+<td><strong>boolean equals(long[] a, long[] a2)</strong></td>
+<td>若两个数组以相同顺序包含相同的元素，则两个数组是相等的。适用于所有的其他基本数据类型。</td>
+</tr>
+<tr>
+<td><strong>void fill(int[] a, int val)</strong></td>
+<td>将指定的 int 值分配给指定 int 型数组指定范围中的每个元素。适用于所有的其他基本数据类型。</td>
+</tr>
+<tr>
+<td><strong>void sort(Object[] a)</strong></td>
+<td>对指定对象数组根据其元素的自然顺序进行升序排列。适用于所有的其他基本数据类型。可以传入方法指定按照特定方法排序。例如，<strong>Collections.reverseOrder()<strong>进行反向排序；</strong>String.CASE_INSENSITIVE_ORDER</strong>进行忽略大小写排序。</td>
+</tr>
+<tr>
+<td><strong>String toString(Object[] a)</strong></td>
+<td>能将数组中的内容全部打印出来。适用于所有的其他基本数据类型。</td>
+</tr>
+</tbody></table>
+<p>举例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] intArray = <span class="keyword">new</span> <span class="title class_">int</span>[<span class="number">5</span>];</span><br><span class="line"><span class="comment">// 调用Arrays.fill进行赋值</span></span><br><span class="line">Arrays.fill(intArray, <span class="number">4</span>);</span><br><span class="line"><span class="comment">// 调用Arrays.sort进行排序</span></span><br><span class="line">Arrays.sort(intArray);</span><br><span class="line"><span class="comment">// 调用Arrays.sort从指定位置进行排序</span></span><br><span class="line">Arrays.sort(intArray, <span class="number">2</span>, <span class="number">4</span>);</span><br><span class="line"><span class="comment">// 调用Arrays.sort进行反向排序</span></span><br><span class="line">Arrays.sort(intArray, Collections.reverseOrder());</span><br><span class="line"><span class="comment">// 调用Arrays.binarySearch查找指定元素</span></span><br><span class="line">System.out.println(Arrays.binarySearch(arr, <span class="number">30</span>));</span><br><span class="line"><span class="comment">// 调用Arrays.toString打印数组元素</span></span><br><span class="line">System.out.print(Arrays.toString(intArray));</span><br></pre></td></tr></table></figure>
+
+<h4 id="5）数组与List之间相互转换"><a href="#5）数组与List之间相互转换" class="headerlink" title="5）数组与List之间相互转换"></a>5）数组与List之间相互转换</h4><h5 id="对象数组转为基本数据类型数组"><a href="#对象数组转为基本数据类型数组" class="headerlink" title="- 对象数组转为基本数据类型数组"></a>- 对象数组转为基本数据类型数组</h5><ol>
+<li>stream流执行转换</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>[] intArray = integerArray.stream().mapToInt(Integer::valueOf).toArray();</span><br></pre></td></tr></table></figure>
+
+<h5 id="基本数据类型数组转为对象数组"><a href="#基本数据类型数组转为对象数组" class="headerlink" title="- 基本数据类型数组转为对象数组"></a>- 基本数据类型数组转为对象数组</h5><ol>
+<li>stream流执行转换</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Integer[] integerArray = Arrays.stream(intArray).boxed().toArray(Integer[]::<span class="keyword">new</span>);</span><br></pre></td></tr></table></figure>
+
+<h5 id="对象数组转为List"><a href="#对象数组转为List" class="headerlink" title="- 对象数组转为List"></a>- 对象数组转为List</h5><ol>
+<li>最常见方式，但不支持增删（会抛异常）</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">List</span> <span class="variable">intList</span> <span class="operator">=</span> Arrays.asList(intArray);</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>数组转为List后，支持增删改查的方式</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ArrayList&lt;Integer&gt; intList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Integer&gt;(Arrays.asList(intArray));</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>通过集合工具类Collections.addAll()方法（最高效）</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ArrayList&lt;Integer&gt; intList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Integer&gt;(intArray.length);</span><br><span class="line">Collections.addAll(intList, intArray);</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>使用stream中的collector</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; intList = Arrays.stream(intArray).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<h5 id="List转为对象数组"><a href="#List转为对象数组" class="headerlink" title="- List转为对象数组"></a>- List转为对象数组</h5><ol>
+<li>toArray()方法，需要传入对应的对象数组构造函数并指定数组的长度</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Integer[] intArray = intList.toArray(<span class="keyword">new</span> <span class="title class_">Integer</span>[intList.size()]);</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>stream流的toArray()方法，需要传入对应对象的构造方法的方法引用</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Integer[] intArray = intList.stream().toArray(Integer[]::<span class="keyword">new</span>);</span><br></pre></td></tr></table></figure>
+
+<h5 id="List转为基本数据类型数组"><a href="#List转为基本数据类型数组" class="headerlink" title="- List转为基本数据类型数组"></a>- List转为基本数据类型数组</h5><ol>
+<li>stream流执行转换</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 方法引用</span></span><br><span class="line"><span class="type">int</span>[] intArray1 = intList.stream().mapToInt(Integer::intValue).toArray();</span><br><span class="line"><span class="comment">// lambda表达式</span></span><br><span class="line"><span class="type">int</span>[] intArray2 = intList.stream().mapToInt(i-&gt;i).toArray();</span><br><span class="line"><span class="comment">// 先使用filter过滤</span></span><br><span class="line"><span class="type">int</span>[] intArray3 = intList.stream().filter(integer -&gt; integer!=<span class="literal">null</span>).mapToInt(i-&gt;i).toArray();</span><br></pre></td></tr></table></figure>
+
+<h5 id="基本数据类型数组转为List"><a href="#基本数据类型数组转为List" class="headerlink" title="- 基本数据类型数组转为List"></a>- 基本数据类型数组转为List</h5><ol>
+<li>stream流执行转换</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; intList1 = Arrays.stream(intArray).mapToObj(Integer::<span class="keyword">new</span>).collect(Collectors.toList());</span><br><span class="line"><span class="comment">// 采用boxed装箱</span></span><br><span class="line">List&lt;Integer&gt; intList2 = Arrays.stream(intArray).boxed().collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>利用CollectionUtils集合工具类进行转换</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; intList = CollectionUtils.arrayToList(intArray);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-列表-List"><a href="#2-列表-List" class="headerlink" title="2. 列表 List"></a>2. 列表 List</h3><h4 id="1）Collection通用方法："><a href="#1）Collection通用方法：" class="headerlink" title="1）Collection通用方法："></a>1）<code>Collection</code>通用方法：</h4><table>
+<thead>
+<tr>
+<th><code>Collection</code> 接口</th>
+<th>方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>元素个数</td>
+<td>size()</td>
+</tr>
+<tr>
+<td>是否为空</td>
+<td>isEmpty()</td>
+</tr>
+<tr>
+<td>是否包含某元素</td>
+<td>contains(Object o)</td>
+</tr>
+<tr>
+<td>迭代器</td>
+<td>iterator()</td>
+</tr>
+<tr>
+<td>清空所有元素</td>
+<td>clear()</td>
+</tr>
+<tr>
+<td>转为数组</td>
+<td>toArray()</td>
+</tr>
+<tr>
+<td>增加元素</td>
+<td>add(E e)</td>
+</tr>
+<tr>
+<td>删除元素</td>
+<td>remove(Object o)</td>
+</tr>
+</tbody></table>
+<h4 id="2）遍历-1"><a href="#2）遍历-1" class="headerlink" title="2）遍历"></a>2）遍历</h4><ol>
+<li>for循环遍历</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; intList.length; ++i) &#123;</span><br><span class="line">	System.out.println(intArray[i]);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// for-each遍历，与for遍历等价</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> a: intList) &#123;</span><br><span class="line">	System.out.println(a);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>for-each遍历</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">intList.forEach(a -&gt; System.out.println(a));</span><br></pre></td></tr></table></figure>
+
+<h4 id="3）排序"><a href="#3）排序" class="headerlink" title="3）排序"></a>3）排序</h4><ol>
+<li>使用List.sort排序。</li>
+</ol>
+<p>可以使用lambda函数按照指定顺序排序。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; intList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"><span class="comment">// 按照从大到小的顺序排序</span></span><br><span class="line">intList.sort((o1, o2) -&gt; o2 - o1);</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>使用Collections.sort排序。</li>
+</ol>
+<p>同样可以使用lambda函数按照指定顺序排序。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; intList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">Collections.sort(intList);</span><br><span class="line"><span class="comment">// 按照从大到小的顺序排序</span></span><br><span class="line">Collections.sort(intList, (o1, o2) -&gt; o2.compareTo(o1));</span><br><span class="line"><span class="comment">// 这等价于</span></span><br><span class="line">Collections.sort(intList, <span class="keyword">new</span> <span class="title class_">Comparator</span>&lt;Integer&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">compare</span><span class="params">(Integer o1, Integer o2)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> o2.compareTo(o1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="4）Collections工具类"><a href="#4）Collections工具类" class="headerlink" title="4）Collections工具类"></a>4）Collections工具类</h4><ul>
+<li>排序操作</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">reverse</span><span class="params">(List list)</span><span class="comment">//反转</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">shuffle</span><span class="params">(List list)</span><span class="comment">//随机排序</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">sort</span><span class="params">(List list)</span><span class="comment">//按自然排序的升序排序</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">sort</span><span class="params">(List list, Comparator c)</span><span class="comment">//定制排序，由Comparator控制排序逻辑</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">swap</span><span class="params">(List list, <span class="type">int</span> i , <span class="type">int</span> j)</span><span class="comment">//交换两个索引位置的元素</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">rotate</span><span class="params">(List list, <span class="type">int</span> distance)</span><span class="comment">//旋转。当distance为正数时，将list后distance个元素整体移到前面。当distance为负数时，将 list的前distance个元素整体移到后面</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>查找,替换操作</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">binarySearch</span><span class="params">(List list, Object key)</span><span class="comment">//对List进行二分查找，返回索引，注意List必须是有序的</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">max</span><span class="params">(Collection coll)</span><span class="comment">//根据元素的自然顺序，返回最大的元素。 类比int min(Collection coll)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">max</span><span class="params">(Collection coll, Comparator c)</span><span class="comment">//根据定制排序，返回最大元素，排序规则由Comparatator类控制。类比int min(Collection coll, Comparator c)</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">fill</span><span class="params">(List list, Object obj)</span><span class="comment">//用指定的元素代替指定list中的所有元素</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">frequency</span><span class="params">(Collection c, Object o)</span><span class="comment">//统计元素出现次数</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">indexOfSubList</span><span class="params">(List list, List target)</span><span class="comment">//统计target在list中第一次出现的索引，找不到则返回-1，类比int lastIndexOfSubList(List source, list target)</span></span><br><span class="line"><span class="type">boolean</span> <span class="title function_">replaceAll</span><span class="params">(List list, Object oldVal, Object newVal)</span><span class="comment">//用新元素替换旧元素</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-队列-Queue"><a href="#3-队列-Queue" class="headerlink" title="3. 队列 Queue"></a>3. 队列 Queue</h3><h4 id="1）基础队列"><a href="#1）基础队列" class="headerlink" title="1）基础队列"></a>1）基础队列</h4><p><code>Queue</code> 是单端队列，只能从一端插入元素，另一端删除元素，实现上一般遵循 <strong>先进先出（FIFO）</strong> 规则。</p>
+<p><code>Queue</code> 扩展了 <code>Collection</code> 的接口，根据 <strong>因为容量问题而导致操作失败后处理方式的不同</strong> 可以分为两类方法: 一种在操作失败后会抛出异常，另一种则会返回特殊值。</p>
+<table>
+<thead>
+<tr>
+<th><code>Queue</code> 接口</th>
+<th>抛出异常</th>
+<th>返回特殊值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>插入队尾</td>
+<td>add(E e)</td>
+<td>offer(E e)</td>
+</tr>
+<tr>
+<td>删除队首</td>
+<td>remove()</td>
+<td>poll()</td>
+</tr>
+<tr>
+<td>查询队首元素</td>
+<td>element()</td>
+<td>peek()</td>
+</tr>
+</tbody></table>
+<h4 id="2）优先队列-PriorityQueue"><a href="#2）优先队列-PriorityQueue" class="headerlink" title="2）优先队列 PriorityQueue"></a>2）优先队列 PriorityQueue</h4><p><code>PriorityQueue</code> 是在 JDK1.5 中被引入的, 其与 <code>Queue</code> 的区别在于元素出队顺序是与优先级相关的，即总是优先级最高的元素先出队。方法与Queue相同。</p>
+<table>
+<thead>
+<tr>
+<th><code>PriorityQueue</code> 接口</th>
+<th>抛出异常</th>
+<th>返回特殊值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>插入队尾</td>
+<td>add(E e)</td>
+<td>offer(E e)</td>
+</tr>
+<tr>
+<td>删除队首</td>
+<td>remove()</td>
+<td>poll()</td>
+</tr>
+<tr>
+<td>查询队首元素</td>
+<td>element()</td>
+<td>peek()</td>
+</tr>
+</tbody></table>
+<p>利用Lambda表达式自定义比较函数。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PriorityQueue&lt;Integer&gt; q = <span class="keyword">new</span> <span class="title class_">PriorityQueue</span>&lt;&gt;((o1, o2)-&gt;o2-o1);</span><br></pre></td></tr></table></figure>
+
+<p>这等价于：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">PriorityQueue&lt;Integer&gt; q = <span class="keyword">new</span> <span class="title class_">PriorityQueue</span>&lt;Integer&gt;(</span><br><span class="line">	<span class="keyword">new</span> <span class="title class_">Comparator</span>&lt;Integer&gt;() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">compare</span><span class="params">(Integer o1, Integer o2)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> o2 - o1;</span><br><span class="line">        &#125;</span><br><span class="line">	&#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>注：Java中默认为小根堆，C++中默认为大根堆。</p>
+<h4 id="3）双端队列-Deque"><a href="#3）双端队列-Deque" class="headerlink" title="3）双端队列 Deque"></a>3）双端队列 Deque</h4><p><code>Deque</code> 是双端队列，在队列的两端均可以插入或删除元素。</p>
+<p><code>	Deque</code> 扩展了 <code>Queue</code> 的接口，增加了在队首和队尾进行插入和删除的方法，同样根据失败后处理方式的不同分为两类：</p>
+<table>
+<thead>
+<tr>
+<th><code>Deque</code> 接口</th>
+<th>抛出异常</th>
+<th>返回特殊值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>插入队首</td>
+<td>addFirst(E e)</td>
+<td>offerFirst(E e)</td>
+</tr>
+<tr>
+<td>插入队尾</td>
+<td>addLast(E e)</td>
+<td>offerLast(E e)</td>
+</tr>
+<tr>
+<td>删除队首</td>
+<td>removeFirst()</td>
+<td>pollFirst()</td>
+</tr>
+<tr>
+<td>删除队尾</td>
+<td>removeLast()</td>
+<td>pollLast()</td>
+</tr>
+<tr>
+<td>查询队首元素</td>
+<td>getFirst()</td>
+<td>peekFirst()</td>
+</tr>
+<tr>
+<td>查询队尾元素</td>
+<td>getLast()</td>
+<td>peekLast()</td>
+</tr>
+</tbody></table>
+<h3 id="4-栈-Stack"><a href="#4-栈-Stack" class="headerlink" title="4. 栈 Stack"></a>4. 栈 Stack</h3><p>Stack继承自Vector，与Vector一样使用synchronized关键字修饰来保证线程安全，但也因此效率低下。因此，在实际应用中多采用Deque来实现栈的功能。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Deque</span> <span class="variable">deque</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">LinkedList</span>&lt;Integer&gt;();</span><br></pre></td></tr></table></figure>
+
+<p>另外，从性能的角度上，选用 <code>ArrayDeque</code> 来实现队列要比 <code>LinkedList</code> 更好。<code>ArrayDeque</code> 也可以用于实现栈。使用如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Deque</span> <span class="variable">deque</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayDeque</span>&lt;Integer&gt;();</span><br></pre></td></tr></table></figure>
+
+<p>当作为栈使用时，可以采用如下方法：</p>
+<table>
+<thead>
+<tr>
+<th><code>Deque</code> 接口</th>
+<th>抛出异常</th>
+<th>返回特殊值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>入栈</td>
+<td>push(E e)</td>
+<td></td>
+</tr>
+<tr>
+<td>出栈</td>
+<td>pop()</td>
+<td>poll()</td>
+</tr>
+<tr>
+<td>查看栈顶</td>
+<td>element()</td>
+<td>peek()</td>
+</tr>
+</tbody></table>
+<h3 id="5-字符串-String"><a href="#5-字符串-String" class="headerlink" title="5. 字符串 String"></a>5. 字符串 String</h3><table>
+<thead>
+<tr>
+<th>方法说明</th>
+<th>方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>指定索引处的 char 值</td>
+<td>char charAt(int index)</td>
+</tr>
+<tr>
+<td>字符串长度</td>
+<td>int length()</td>
+</tr>
+<tr>
+<td>判断字符串是否为空</td>
+<td>boolean isEmpty()</td>
+</tr>
+<tr>
+<td>返回字符串的副本，忽略前导空白和尾部空白。</td>
+<td>String trim()</td>
+</tr>
+<tr>
+<td>将String 中的所有字符都转换为小写</td>
+<td>String toLowerCase()</td>
+</tr>
+<tr>
+<td>将String 中的所有字符都转换为大写</td>
+<td>[String toUpperCase()</td>
+</tr>
+<tr>
+<td>比较两个字符串</td>
+<td>int compareTo(String anotherString)</td>
+</tr>
+<tr>
+<td>比较两个字符串是否相等</td>
+<td>boolean equals(Object anObject)</td>
+</tr>
+<tr>
+<td>连接字符串</td>
+<td>String concat(String str)</td>
+</tr>
+<tr>
+<td>将此字符串转换为一个新的字符数组</td>
+<td>char[] toCharArray()</td>
+</tr>
+<tr>
+<td>返回一个新的字符串，是此字符串的子字符串</td>
+<td>String substring(int beginIndex)</td>
+</tr>
+<tr>
+<td></td>
+<td>String substring(int beginIndex, int endIndex)</td>
+</tr>
+<tr>
+<td>字符串是否有指定前缀&#x2F;后缀</td>
+<td>boolean startsWith(String prefix)</td>
+</tr>
+<tr>
+<td></td>
+<td>boolean startsWith(String prefix, int toffset)</td>
+</tr>
+<tr>
+<td></td>
+<td>boolean endsWith(String suffix)</td>
+</tr>
+<tr>
+<td>指定字符第一次出现的索引</td>
+<td>int indexOf(String str)</td>
+</tr>
+<tr>
+<td></td>
+<td>int indexOf(String str, int fromIndex)</td>
+</tr>
+<tr>
+<td>指定字符最后一次出现的索引</td>
+<td>int lastIndexOf(String str)</td>
+</tr>
+<tr>
+<td></td>
+<td>int lastIndexOf(String str, int fromIndex)</td>
+</tr>
+<tr>
+<td>替换字符串</td>
+<td>String replace(char oldChar, char newChar)</td>
+</tr>
+<tr>
+<td></td>
+<td>String replaceAll(String regex, String replacement)</td>
+</tr>
+<tr>
+<td></td>
+<td>String replaceFirst(String regex, String replacement)</td>
+</tr>
+<tr>
+<td>拆分字符串</td>
+<td>String[] split(String regex)</td>
+</tr>
+<tr>
+<td></td>
+<td>String[] split(String regex, int limit)</td>
+</tr>
+</tbody></table>
+<h3 id="6-字典-Map"><a href="#6-字典-Map" class="headerlink" title="6. 字典 Map"></a>6. 字典 Map</h3><h4 id="1）基本操作"><a href="#1）基本操作" class="headerlink" title="1）基本操作"></a>1）基本操作</h4><table>
+<thead>
+<tr>
+<th>方法说明</th>
+<th>方法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>map的长度</td>
+<td>size()</td>
+</tr>
+<tr>
+<td>插入元素</td>
+<td>put(Object key, Object value)</td>
+</tr>
+<tr>
+<td>获取元素</td>
+<td>get(Object key)</td>
+</tr>
+<tr>
+<td>移除元素</td>
+<td>remove(Object key)</td>
+</tr>
+<tr>
+<td>清空map</td>
+<td>clear()</td>
+</tr>
+<tr>
+<td>map是否为空</td>
+<td>isEmpty()</td>
+</tr>
+<tr>
+<td>是否包含指定key</td>
+<td>containsKey(Object key)</td>
+</tr>
+<tr>
+<td>是否包含指定value</td>
+<td>containsValue(Object value)</td>
+</tr>
+</tbody></table>
+<h4 id="2）排序"><a href="#2）排序" class="headerlink" title="2）排序"></a>2）排序</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> <span class="title class_">TreeMap</span>&lt;String, String&gt;((o1, o2)-&gt;o2-o1);</span><br><span class="line"><span class="comment">// 这等价于</span></span><br><span class="line">Map&lt;String, String&gt; map = <span class="keyword">new</span> <span class="title class_">TreeMap</span>&lt;String, String&gt;(<span class="keyword">new</span> <span class="title class_">Comparator</span>&lt;String&gt;() &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">compare</span><span class="params">(String o1, String o2)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> o2.compareTo(o1);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="3）for循环遍历"><a href="#3）for循环遍历" class="headerlink" title="3）for循环遍历"></a>3）for循环遍历</h4><h5 id="keySet-遍历"><a href="#keySet-遍历" class="headerlink" title="- keySet()遍历"></a>- keySet()遍历</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (String key : map.keySet()) &#123;</span><br><span class="line">    System.out.println(key + <span class="string">&quot; ：&quot;</span> + map.get(key));</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 这等价于</span></span><br><span class="line">Iterator&lt;String&gt; iterator = map.keySet().iterator();</span><br><span class="line"><span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> iterator.next();</span><br><span class="line">    System.out.println(key + <span class="string">&quot;　：&quot;</span> + map.get(key));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="entrySet-遍历"><a href="#entrySet-遍历" class="headerlink" title="- entrySet()遍历"></a>- entrySet()遍历</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (Map.Entry&lt;String, String&gt; entry : map.entrySet()) &#123;</span><br><span class="line">    System.out.println(entry.getKey() + <span class="string">&quot; ：&quot;</span> + entry.getValue());</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 这等价于</span></span><br><span class="line">Iterator&lt;Map.Entry&lt;String, String&gt;&gt; iterator = map.entrySet().iterator();</span><br><span class="line"><span class="keyword">while</span> (iterator.hasNext()) &#123;</span><br><span class="line">    Map.Entry&lt;String, String&gt; entry = iterator.next();</span><br><span class="line">    System.out.println(entry.getKey() + <span class="string">&quot;　：&quot;</span> + entry.getValue());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="for-each遍历"><a href="#for-each遍历" class="headerlink" title="- for-each遍历"></a>- for-each遍历</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">map.forEach((k, v)-&gt;times.add(v));</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、常用算法"><a href="#三、常用算法" class="headerlink" title="三、常用算法"></a>三、常用算法</h2><h4 id="1-通过stream"><a href="#1-通过stream" class="headerlink" title="1. 通过stream()"></a>1. 通过stream()</h4><h4 id="1）List取最值"><a href="#1）List取最值" class="headerlink" title="1）List取最值"></a>1）List取最值</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">intList.stream().max(Integer::compareTo).get();</span><br><span class="line">intList.stream().min(Integer::compareTo).get();</span><br></pre></td></tr></table></figure>
+
+<h4 id="2）List取平均值"><a href="#2）List取平均值" class="headerlink" title="2）List取平均值"></a>2）List取平均值</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">intList.stream().mapToInt(Integer::intValue).average().orElse(<span class="number">0D</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="3）List求和"><a href="#3）List求和" class="headerlink" title="3）List求和"></a>3）List求和</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">integers.stream().reduce(Integer::sum).get();</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="四、参考文档"><a href="#四、参考文档" class="headerlink" title="四、参考文档"></a>四、参考文档</h2><p><a target="_blank" rel="noopener" href="https://javaguide.cn/java/collection/java-collection-questions-01.html">Java集合常见面试题总结</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44270751/article/details/123352447">java中数组拷贝（深拷贝）的四种方法</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/lzq198754/p/5780165.html">Java map 详解 - 用法、遍历、排序、常用API等</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_27255679/article/details/96430732">Java8 stream平均值、最小数、最大数、求和</a></p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>Java刷题基础语法</p><p><a href="http://hyeee.me/2023/05/01/Java刷题基础语法/">http://hyeee.me/2023/05/01/Java刷题基础语法/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Hyeee</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2023-05-01</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2023-05-01</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Java/">Java</a></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2024/02/02/Icarus%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Icarus主题美化</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2023/04/04/Effective%20Modern%20C++%E7%AC%94%E8%AE%B0/"><span class="level-item">Effective Modern C++笔记</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><!--!--></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1 is-sticky"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-02T07:32:46.000Z">2024-02-02</time></p><p class="title"><a href="/2024/02/02/Icarus%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/">Icarus主题美化</a></p><p class="categories"><a href="/categories/%E5%85%B6%E4%BB%96/">其他</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-05-01T14:25:46.000Z">2023-05-01</time></p><p class="title"><a href="/2023/05/01/Java%E5%88%B7%E9%A2%98%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95/">Java刷题基础语法</a></p><p class="categories"><a href="/categories/%E8%AF%AD%E8%A8%80/">语言</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-04-04T11:32:46.000Z">2023-04-04</time></p><p class="title"><a href="/2023/04/04/Effective%20Modern%20C++%E7%AC%94%E8%AE%B0/">Effective Modern C++笔记</a></p><p class="categories"><a href="/categories/%E8%AF%AD%E8%A8%80/">语言</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-02-01T11:32:46.000Z">2023-02-01</time></p><p class="title"><a href="/2023/02/01/Effective%20C++%E7%AC%94%E8%AE%B0/">Effective C++笔记</a></p><p class="categories"><a href="/categories/%E8%AF%AD%E8%A8%80/">语言</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2020-12-13T07:15:29.000Z">2020-12-13</time></p><p class="title"><a href="/2020/12/13/IDEA%E5%B7%B2%E6%9C%89maven%E6%8F%92%E4%BB%B6%E4%BD%86mvn%E5%87%BA%E9%94%99/">IDEA已有maven插件但mvn出错</a></p><p class="categories"><a href="/categories/%E5%85%B6%E4%BB%96/">其他</a></p></div></article></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/c/"><span class="tag">c++</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/git/"><span class="tag">git</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/maven/"><span class="tag">maven</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/nexo/"><span class="tag">nexo</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/02/"><span class="level-start"><span class="level-item">二月 2024</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/05/"><span class="level-start"><span class="level-item">五月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/04/"><span class="level-start"><span class="level-item">四月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/02/"><span class="level-start"><span class="level-item">二月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/12/"><span class="level-start"><span class="level-item">十二月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></div></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a><p class="is-size-7"><span>&copy; 2024 Hyeee</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
