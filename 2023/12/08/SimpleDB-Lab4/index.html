@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>SimpleDB-Lab4 - Hyeee&#039;s Home</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Hyeee&#039;s Home"><meta name="msapplication-TileImage" content="/img/pikachu.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hyeee&#039;s Home"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="0.实验目标在这个实验中，你将在SimpleDB中实现一个简单的基于锁的事务系统。你将需要在代码中的适当位置添加锁和解锁调用，以及跟踪每个事务所持有的锁的代码，并在需要时授予事务锁。 本文档的其余部分描述了添加事务支持所涉及的内容，并提供了一个关于如何将这种支持添加到你的数据库的基本概要。"><meta property="og:type" content="blog"><meta property="og:title" content="SimpleDB-Lab4"><meta property="og:url" content="http://hyeee.me/2023/12/08/SimpleDB-Lab4/"><meta property="og:site_name" content="Hyeee&#039;s Home"><meta property="og:description" content="0.实验目标在这个实验中，你将在SimpleDB中实现一个简单的基于锁的事务系统。你将需要在代码中的适当位置添加锁和解锁调用，以及跟踪每个事务所持有的锁的代码，并在需要时授予事务锁。 本文档的其余部分描述了添加事务支持所涉及的内容，并提供了一个关于如何将这种支持添加到你的数据库的基本概要。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://hyeee.me/2023/12/08/SimpleDB-Lab4/image-20240303211837173.png"><meta property="article:published_time" content="2023-12-08T14:25:46.000Z"><meta property="article:modified_time" content="2023-12-08T14:25:46.000Z"><meta property="article:author" content="Hyeee"><meta property="article:tag" content="Java"><meta property="article:tag" content="DataBase"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://hyeee.me/2023/12/08/SimpleDB-Lab4/image-20240303211837173.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://hyeee.me/2023/12/08/SimpleDB-Lab4/"},"headline":"SimpleDB-Lab4","image":["http://hyeee.me/2023/12/08/SimpleDB-Lab4/image-20240303211837173.png"],"datePublished":"2023-12-08T14:25:46.000Z","dateModified":"2023-12-08T14:25:46.000Z","author":{"@type":"Person","name":"Hyeee"},"publisher":{"@type":"Organization","name":"Hyeee's Home","logo":{"@type":"ImageObject","url":"http://hyeee.me/img/logo_pikachu.svg"}},"description":"0.实验目标在这个实验中，你将在SimpleDB中实现一个简单的基于锁的事务系统。你将需要在代码中的适当位置添加锁和解锁调用，以及跟踪每个事务所持有的锁的代码，并在需要时授予事务锁。 本文档的其余部分描述了添加事务支持所涉及的内容，并提供了一个关于如何将这种支持添加到你的数据库的基本概要。"}</script><link rel="canonical" href="http://hyeee.me/2023/12/08/SimpleDB-Lab4/"><link rel="icon" href="/img/pikachu.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/archives">时间轴</a><a class="navbar-item" href="/categories">归档</a><a class="navbar-item" href="/tags">标签</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2023-12-08T14:25:46.000Z" title="2023/12/8 22:25:46">2023-12-08</time>发表</span><span class="level-item"><time dateTime="2023-12-08T14:25:46.000Z" title="2023/12/8 22:25:46">2023-12-08</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></span><span class="level-item">30 分钟读完 (大约4488个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">SimpleDB-Lab4</h1><div class="content"><h2 id="0-实验目标"><a href="#0-实验目标" class="headerlink" title="0.实验目标"></a>0.实验目标</h2><p>在这个实验中，你将在SimpleDB中实现一个简单的基于锁的事务系统。你将需要在代码中的适当位置添加锁和解锁调用，以及跟踪每个事务所持有的锁的代码，并在需要时授予事务锁。</p>
+<p>本文档的其余部分描述了添加事务支持所涉及的内容，并提供了一个关于如何将这种支持添加到你的数据库的基本概要。</p>
+<span id="more"></span>
+
+<h3 id="Transactions-outline"><a href="#Transactions-outline" class="headerlink" title="Transactions outline"></a>Transactions outline</h3><h4 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h4><p>事务是一组以原子方式执行的数据库操作(例如插入、删除和读取)，也就是说，要么所有的动作都完成了，要么一个动作都没有完成，而数据库的外部观察者并不清楚这些动作不是作为单个不可分割动作的一部分完成的。</p>
+<h4 id="ACID特性"><a href="#ACID特性" class="headerlink" title="ACID特性"></a>ACID特性</h4><p>为了理解在SimpleDB中事务管理是如何工作的，接下来简要介绍它是如何满足ACID特性的：</p>
+<ul>
+<li>Atomicity：严格的两阶段锁以及缓冲区管理将确保原子性</li>
+<li>Consistency：通过原子性来保证事务的一致性，在SimpleDB中并未使用其他一致性方法（如键约束）</li>
+<li>Isolation：严格的两阶段提交保证隔离性</li>
+<li>Durability：强制缓冲区管理策略可确保持久性</li>
+</ul>
+<h4 id="两阶段锁"><a href="#两阶段锁" class="headerlink" title="两阶段锁"></a>两阶段锁</h4><p>通过上述ACID特性可以得知两阶段锁在其中扮演重要的角色，那么首先来了解下什么是两阶段锁。两阶段锁协议的主要内容如下：</p>
+<ul>
+<li>在对任何数据进行读、写操作之前，事务首先要获得对该数据的封锁。在对任何数据进行读操作之前要申请获得S锁，在进行写操作之前要申请获得X锁。加锁不成功事务进入等待状态，直到加锁成功才成功继续执行。</li>
+<li>在释放一个封锁之后，事务不再获得任何其他封锁；事务进入解锁阶段，在该阶段进行解锁操作不能再进行加锁操作。</li>
+</ul>
+<p>两段锁的含义是事务分为两个阶段：</p>
+<ul>
+<li>第一阶段是获得封锁，称为扩展阶段。</li>
+<li>第二阶段称为释放阶段，也成为收缩阶段。</li>
+</ul>
+<p>有如下三种两阶段锁：</p>
+<ul>
+<li>Basic 2PL：在事务过程中，分为获得锁和释放锁两个阶段</li>
+<li>Strict 2PL：直到事务结束为止，都不释放获得的锁</li>
+<li>Static 2PL：在事务开始前，获得所需的全部锁</li>
+</ul>
+<p>两段封锁法可以这样来实现：事务开始后就处于加锁阶段，一直到执行ROLLBACK和COMMIT之前都是加锁阶段。ROLLBACK和COMMIT使事务进入解锁阶段，即在ROLLBACK和COMMIT模块中DBMS释放所有封锁。</p>
+<h4 id="Recovery-and-Buffer-Management"><a href="#Recovery-and-Buffer-Management" class="headerlink" title="Recovery and Buffer Management"></a>Recovery and Buffer Management</h4><p>为了简化你的工作，建议实现一个非强制缓冲区管理策略：</p>
+<ul>
+<li>如果页面被未提交的事务锁住，你不应该从缓冲池中丢弃脏页(更新脏页)。</li>
+<li>事务提交后，应该强制将脏页刷新至磁盘(这就是强制策略)。</li>
+</ul>
+<p>为了进一步简化实现，可以假设SimpleDB在处理“transactionComplete”命令时不会崩溃。注意本次实验不需要实现基于日志的崩溃恢复，也不需要撤销(undo)任何工作(不必丢弃脏页)并且也不需要重做(redo)任何工作(在提交时强制更新并且在提交事务期间不会崩溃)。</p>
+<h2 id="1-Granting-Locks"><a href="#1-Granting-Locks" class="headerlink" title="1. Granting Locks"></a>1. Granting Locks</h2><h3 id="a-要修改的文件"><a href="#a-要修改的文件" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;simpledb&#x2F;BufferPool.java</li>
+</ul>
+<h3 id="b-实现说明"><a href="#b-实现说明" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>我们需要添加对SimpleDB的调用(例如在BufferPool中)，以允许调用方代表特定事务请求或释放特定对象上的(共享或独占)锁。</p>
+</li>
+<li><p>我们建议在页面粒度上锁，为了简化测试，不要实现表级锁定(即使可能)，本文档的其余部分和我们的单元测试假设页面级锁定。</p>
+</li>
+<li><p>我们需要创建数据结构来跟踪每个事务持有哪些锁，并检查是否应在请求时向事务授予锁。</p>
+</li>
+<li><p>我们需要实现共享锁和独占锁。回顾一下，这些锁的工作方式如下：</p>
+</li>
+<li><p>在事务进行读操作之前，它必须获得共享锁</p>
+</li>
+<li><p>在事务进行写操作之前，它必须获得独占锁</p>
+</li>
+<li><p>多个事务可以获取同一对象的共享锁</p>
+</li>
+<li><p>只有一个事务能获取对象的独占锁</p>
+</li>
+<li><p>如果事务t是持有对象o共享锁的唯一事务，t能够将持有的对象o的共享锁升级为独占锁(锁升级)</p>
+</li>
+<li><p>如果事务请求的锁不能立即被授予，你的代码应该锁住，直到锁可用(锁被不同线程的其他事务释放)；在锁实现中要注意争用条件——想想对锁的并发调用会如何影响行为。</p>
+</li>
+</ul>
+<h3 id="c-实现目标"><a href="#c-实现目标" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li><p>编写BufferPool中获取和释放锁的方法。假设你使用的是页级锁，你将需要完成以下工作：</p>
+</li>
+<li><p>修改getPage()，使其在返回页面前阻塞并获得所需的锁。 </p>
+</li>
+<li><p>实现unsafeReleasePage()。这个方法主要用于测试，以及在事务结束时使用。 </p>
+</li>
+<li><p>实现 holdsLock()，以便练习2中的逻辑能够确定一个页面是否已经被事务锁定。 你可能会发现，定义一个LockManager类来负责维护事务和锁的状态是很有帮助的，但设计决定权在你。</p>
+</li>
+<li><p>通过单元测试LockingTest（需要完成下一个练习）。</p>
+</li>
+</ul>
+<p>务期间不会崩溃)。</p>
+<h2 id="2-Lock-Lifetime"><a href="#2-Lock-Lifetime" class="headerlink" title="2. Lock Lifetime"></a>2. Lock Lifetime</h2><h3 id="a-要修改的文件-1"><a href="#a-要修改的文件-1" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;simpledb&#x2F;BufferPool.java</li>
+</ul>
+<h3 id="b-实现说明-1"><a href="#b-实现说明-1" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>你将需要实现严格的两阶段锁。这意味着事务在访问任何对象之前应该获得相应类型的锁，并且在事务提交之前不应该释放任何锁。</p>
+</li>
+<li><p>幸运的是，SimpleDB的设计是这样的：在你读取或修改页面之前，有可能在BufferPool.getPage()中获得页面的锁。因此，我们建议在getPage()中获取锁，而不是在你的每个操作中添加对锁程序的调用。根据你的实现，你有可能不需要在其他地方获取锁。这要靠你自己去验证!</p>
+</li>
+<li><p>你需要在读取任何页面（或元组）之前获得一个共享锁，你需要在写入任何页面（或元组）之前获得一个独占锁。你会注意到，我们已经在BufferPool中传递了许可对象；这些对象表明调用者希望对被访问对象拥有的锁的类型（我们已经给了你许可类的代码。）</p>
+</li>
+<li><p>请注意，你对HeapFile.insertTuple()和HeapFile.deleteTuple()的实现，以及HeapFile.iterator()返回的迭代器的实现应该使用BufferPool.getPage()访问页面。仔细检查这些getPage()的不同用法是否传递了正确的权限对象（例如，Permissions.READ_WRITE 或 Permissions.READ_ONLY）。你也可以仔细检查你实现的BufferPool.insertTuple()和BufferPool.deleteTupe()是否在它们访问的任何页面上调用markDirty()（你在实验2中实现这段代码时应该这样做，但我们没有测试这种情况）。</p>
+</li>
+<li><p>在你获得锁之后，你也需要考虑何时释放它们。很明显，你应该在一个事务提交或中止后释放所有与之相关的锁，以确保严格的2PL。然而，在其他情况下，在事务结束前释放锁可能是有用的。例如，你可以在扫描页面找到空槽后释放一个共享锁（如下所述）。</p>
+</li>
+<li><p>确保你在整个SimpleDB获得和释放锁。一些（但不一定是全部）你应该验证的操作正常工作：</p>
+</li>
+<li><p>在SeqScan过程中从页面上读取 tuple（如果你在BufferPool.getPage()中实现了锁定，只要你的HeapFile.iterator()使用BufferPool.getPage()，这应该可以正确工作。）</p>
+</li>
+<li><p>通过BufferPool和HeapFile方法插入和删除图元（如果你在BufferPool.getPage()中实现了锁，只要HeapFile.insertTuple()和HeapFile.deleteTuple()使用BufferPool.getPage()，这应该能正确工作。） </p>
+</li>
+<li><p>你还需要特别考虑在以下情况下获取和释放锁的问题：</p>
+</li>
+<li><p>向HeapFile添加一个新的页面。你什么时候把这个页面写到磁盘上？是否存在与其他事务（在其他线程上）的竞赛条件，可能需要在HeapFile级别上特别注意，而不考虑页级锁定？</p>
+</li>
+<li><p>寻找一个可以插入图元的空槽。大多数实现都会扫描页面，寻找一个空槽，并且需要一个READ_ONLY锁来完成这个工作。然而，令人惊讶的是，如果一个事务t发现页面p上没有空槽，t可以立即释放p上的锁。虽然这显然与两阶段锁的规则相矛盾，但它是可以的，因为t没有使用页面上的任何数据，这样，一个更新p的并发事务t’不可能影响t的答案或结果。</p>
+</li>
+</ul>
+<h3 id="c-实现目标-1"><a href="#c-实现目标-1" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试LockingTest。</li>
+</ul>
+<h2 id="3-Implementing-NO-STEAL"><a href="#3-Implementing-NO-STEAL" class="headerlink" title="3. Implementing NO STEAL"></a>3. Implementing NO STEAL</h2><h3 id="a-要修改的文件-2"><a href="#a-要修改的文件-2" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;simpledb&#x2F;BufferPool.java</li>
+</ul>
+<h3 id="b-实现说明-2"><a href="#b-实现说明-2" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li>一个事务的修改只有在它提交之后才会被写入磁盘。这意味着我们可以通过丢弃脏页并从磁盘重读来中止一个事务。因此，我们必须不驱逐脏页。这个策略被称为NO STEAL。</li>
+<li>你将需要修改BufferPool中的evictPage方法。特别是，它必须永远不驱逐一个脏页。如果你的驱逐策略倾向于驱逐一个脏页，你将不得不找到一种方法来驱逐一个替代页。在缓冲池中的所有页面都是脏的情况下，你应该抛出一个DbException。如果你的驱逐策略驱逐了一个干净的页面，要注意事务可能已经持有被驱逐的页面的任何锁，并在你的实现中适当地处理它们。</li>
+<li>需要在BufferPool的evictPage方法中实现必要的页面驱逐逻辑，而不驱逐脏页。</li>
+</ul>
+<h3 id="c-实现目标-2"><a href="#c-实现目标-2" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><h2 id="4-Transactions"><a href="#4-Transactions" class="headerlink" title="4. Transactions"></a>4. Transactions</h2><h3 id="a-要修改的文件-3"><a href="#a-要修改的文件-3" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;simpledb&#x2F;BufferPool.java</li>
+</ul>
+<h3 id="b-实现说明-3"><a href="#b-实现说明-3" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>在SimpleDB中，每次查询开始时都会创建一个TransactionId对象。这个对象被传递给每个参与查询的操作者。当查询完成后，BufferPool方法 transactionComplete被调用。</p>
+</li>
+<li><p>调用此方法可以提交或中止事务，由参数标志commit指定。在其执行过程中的任何时候，操作者都可以抛出一个TransactionAbortedException异常，这表明发生了内部错误或死锁。我们为你提供的测试案例创建了适当的TransactionId对象，以适当的方式将它们传递给你的操作者，并在查询完成后调用 transactionComplete。我们还实现了TransactionId。</p>
+</li>
+<li><p>需要在BufferPool中实现transactionComplete()方法。</p>
+</li>
+<li><p>请注意，transactionComplete有两个版本，一个是接受额外的布尔提交参数，另一个是不接受。没有额外参数的版本应该总是提交，所以可以简单地通过调用 transactionComplete(tid, true) 来实现。</p>
+</li>
+<li><p>当commit时，你应该将与事务相关的脏页冲到磁盘上。当abort的时候，你应该通过恢复页面到磁盘上的状态来恢复事务所做的任何改变。</p>
+</li>
+<li><p>无论事务是提交还是中止，你都应该释放BufferPool保存的关于该事务的任何状态，包括释放该事务持有的任何锁。</p>
+</li>
+</ul>
+<h3 id="c-实现目标-3"><a href="#c-实现目标-3" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li><p>通过单元测试TransactionTest和AbortEvictionTest</p>
+</li>
+<li><p>TransactionTest需要下一个练习完成</p>
+</li>
+</ul>
+<h2 id="5-Deadlocks-and-Aborts"><a href="#5-Deadlocks-and-Aborts" class="headerlink" title="5. Deadlocks and Aborts"></a>5. Deadlocks and Aborts</h2><h3 id="a-要修改的文件-4"><a href="#a-要修改的文件-4" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;simpledb&#x2F;BufferPool.java</li>
+</ul>
+<h3 id="b-实现说明-4"><a href="#b-实现说明-4" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>SimpleDB中的事务有可能出现死锁（如果你不明白为什么，我们建议阅读Ramakrishnan &amp; Gehrke中关于死锁的内容）。你需要检测这种情况并抛出一个TransactionAbortedException。</p>
+</li>
+<li><p>有很多死锁检测的方法，例如，实现一个简单的超时策略，如果事务在给定时间段后还没有完成，它将中止事务。</p>
+</li>
+<li><p>对于真实的场景，我们可以在依赖关系图数据结构中实现循环检测。在这个方案中，我们将定期或每当尝试授予新锁时检查依赖关系图中的周期，如果存在周期，则中止某些操作。如果检测到死锁的存在，我们必须解决死锁。假设当事务t等待锁时检测到死锁的存在，中止t正在等待的所有事务；这可能导致大量工作被撤销，但可以保证t会取得进展。或者，我们可以中止t，以使其他事务有机会取得进展。这意味最终用户必须重试事务t。</p>
+</li>
+<li><p>另一种方法是使用事务的全局排序来避免建立等待图。出于性能方面的考虑，这有时是首选，但是在这种方案下，本来可以成功的事务可能会被错误地中止。例子包括WAIT-DIE和WOUND-WAIT方案。</p>
+</li>
+<li><p>现死锁检测或预防。对于你的死锁处理系统，你有很多设计决定，但没有必要做一些非常复杂的事情。我们希望你能做得比每个事务的简单超时更好。一个好的起点是在每个锁请求前的等待图中实现周期检测，这样的实现将得到全额奖励。请在实验报告中描述你的选择，并列出你的选择与其他选择相比的优点和缺点。</p>
+</li>
+<li><p>你应该通过抛出TransactionAbortedException异常来确保你的代码在发生死锁时正确中止事务。这个异常将被执行事务的代码所捕获（例如，TransactionTest.java），它应该调用 transactionComplete() 来清理事务。我们不期望你自动重启一个因死锁而失败的事务–你可以假设更高级别的代码会处理这个问题。</p>
+</li>
+<li><p>我们在test&#x2F;simpledb&#x2F;DeadlockTest.java中提供了一些（不是单元的）测试。它们实际上有点复杂，所以它们可能需要超过几秒钟的时间来运行（取决于你的策略）。如果它们似乎无限期地挂起，那么你可能有一个未解决的死锁。这些测试构建了简单的死锁情况，你的代码应该能够逃脱。</p>
+</li>
+<li><p>注意，在DeadLockTest.java的顶部附近有两个计时参数；这些参数决定了测试检查是否已经获得锁的频率，以及中止的事务被重新启动前的等待时间。如果你使用基于超时的检测方法，你可以通过调整这些参数观察到不同的性能特征。测试将把解决死锁对应的TransactionAbortedExceptions输出到控制台。</p>
+</li>
+<li><p>在这一点上，你应该有一个可恢复的数据库，也就是说，如果数据库系统崩溃（在 transactionComplete() 以外的地方），或者如果用户显式地中止一个事务，那么在系统重新启动（或者事务中止）之后，任何正在运行的事务的影响将不可见。 你可能希望通过运行一些事务和显式地杀死数据库服务器来验证这一点。</p>
+</li>
+</ul>
+<h3 id="c-实现目标-4"><a href="#c-实现目标-4" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过TransactionTest系统测试（根据实现，它也可能运行相当长的时间）</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li><p>参考<a target="_blank" rel="noopener" href="https://cjdhy.blog.csdn.net/article/details/131850550">MIT 6.830数据库系统</a>，将等待时间修改为原本十分之一</p>
+</li>
+<li><p>execution中Delete和Insert原本没有正确使用TransactionId，做更正</p>
+</li>
+<li><p>BufferPool中加入LockManager类型（自定义）的lockManager，用于管理锁，提供加锁、解锁等方法；加入Map&lt;TransactionId, List&lt;Page&gt;&gt;类型的tidToPagesMap，将事务id映射到对应的Page。</p>
+</li>
+<li><p>在getPage()中，根据Permissions来判断需要加锁的类型，并调用lockManager进行获取锁。若类型为Permissions.READ_WRITE，则将该Page添加到tid事务相关的PageList中。</p>
+</li>
+<li><p>unsafeReleasePage()调用lockManager的对应方法。</p>
+</li>
+<li><p>transactionComplete()中，若commit事务，则将事务涉及的Page都刷新到磁盘；否则，回滚事务，重新从磁盘中读取对应的Page。</p>
+</li>
+<li><p>在insertTuple()和deleteTuple()中，更新tidToPagesMap，将涉及到的Page加入到对应事务id。</p>
+</li>
+<li><p>flushPages()通过tidToPagesMap，将传入的事务id对应的Page刷新到磁盘。</p>
+</li>
+<li><p>更新evictPage()方法，每次淘汰不脏的Page。若均为脏页，则抛出异常。</p>
+</li>
+<li><p>测试结果截图：</p>
+</li>
+</ul>
+<p><img src="/2023/12/08/SimpleDB-Lab4/image-20240303211837173.png" alt="image-20240303211837173"></p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>SimpleDB-Lab4</p><p><a href="http://hyeee.me/2023/12/08/SimpleDB-Lab4/">http://hyeee.me/2023/12/08/SimpleDB-Lab4/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Hyeee</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2023-12-08</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2023-12-08</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Java/">Java</a><a class="link-muted mr-2" rel="tag" href="/tags/DataBase/">DataBase</a></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2023/12/14/SimpleDB-Lab5/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">SimpleDB-Lab5</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2023/12/04/SimpleDB-Lab3/"><span class="level-item">SimpleDB-Lab3</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><!--!--></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1 is-sticky"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-14T13:25:26.000Z">2024-02-14</time></p><p class="title"><a href="/2024/02/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86/">计算机网络知识点整理</a></p><p class="categories"><a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">计算机基础</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-02T07:32:46.000Z">2024-02-02</time></p><p class="title"><a href="/2024/02/02/Icarus%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/">Icarus主题美化</a></p><p class="categories"><a href="/categories/%E5%85%B6%E4%BB%96/">其他</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-22T14:25:46.000Z">2023-12-22</time></p><p class="title"><a href="/2023/12/22/SimpleDB-Lab6/">SimpleDB-Lab6</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-14T14:25:46.000Z">2023-12-14</time></p><p class="title"><a href="/2023/12/14/SimpleDB-Lab5/">SimpleDB-Lab5</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-08T14:25:46.000Z">2023-12-08</time></p><p class="title"><a href="/2023/12/08/SimpleDB-Lab4/">SimpleDB-Lab4</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%A1%86%E6%9E%B6/"><span class="level-start"><span class="level-item">框架</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA/"><span class="level-start"><span class="level-item">算法导论</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">计算机基础</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E9%A1%B9%E7%9B%AE/"><span class="level-start"><span class="level-item">项目</span></span><span class="level-end"><span class="level-item tag">10</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/C/"><span class="tag">C#</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/C/"><span class="tag">C++</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/DataBase/"><span class="tag">DataBase</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Django/"><span class="tag">Django</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">8</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JavaScript/"><span class="tag">JavaScript</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Lombok/"><span class="tag">Lombok</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MyBatis/"><span class="tag">MyBatis</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MySQL/"><span class="tag">MySQL</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spring/"><span class="tag">Spring</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/c/"><span class="tag">c++</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/git/"><span class="tag">git</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/maven/"><span class="tag">maven</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/nexo/"><span class="tag">nexo</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%AE%A1%E7%BD%91/"><span class="tag">计网</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/02/"><span class="level-start"><span class="level-item">二月 2024</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/12/"><span class="level-start"><span class="level-item">十二月 2023</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/11/"><span class="level-start"><span class="level-item">十一月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/10/"><span class="level-start"><span class="level-item">十月 2023</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/09/"><span class="level-start"><span class="level-item">九月 2023</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/08/"><span class="level-start"><span class="level-item">八月 2023</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/05/"><span class="level-start"><span class="level-item">五月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/04/"><span class="level-start"><span class="level-item">四月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/02/"><span class="level-start"><span class="level-item">二月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/08/"><span class="level-start"><span class="level-item">八月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/02/"><span class="level-start"><span class="level-item">二月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/01/"><span class="level-start"><span class="level-item">一月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/12/"><span class="level-start"><span class="level-item">十二月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/09/"><span class="level-start"><span class="level-item">九月 2020</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/04/"><span class="level-start"><span class="level-item">四月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/12/"><span class="level-start"><span class="level-item">十二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/05/"><span class="level-start"><span class="level-item">五月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/04/"><span class="level-start"><span class="level-item">四月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/02/"><span class="level-start"><span class="level-item">二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></div></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a><p class="is-size-7"><span>&copy; 2024 Hyeee</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

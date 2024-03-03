@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>SimpleDB-Lab1 - Hyeee&#039;s Home</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Hyeee&#039;s Home"><meta name="msapplication-TileImage" content="/img/pikachu.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hyeee&#039;s Home"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="0.实验目标完成本实验后，要能通过ScanTest系统测试  实现管理Tuple的类，即Tuple、TupleDesc。SimpleDB 中已经实现了Field、IntField、 StringField和Type，只需要支持整数和（固定长度的）字符串字段以及固定长度的 tuples。 实现 Catalog 。 实现BufferPool构造函数和getPage()方法。 实现访问方法、HeapPa"><meta property="og:type" content="blog"><meta property="og:title" content="SimpleDB-Lab1"><meta property="og:url" content="http://hyeee.me/2023/10/30/SimpleDB-Lab1/"><meta property="og:site_name" content="Hyeee&#039;s Home"><meta property="og:description" content="0.实验目标完成本实验后，要能通过ScanTest系统测试  实现管理Tuple的类，即Tuple、TupleDesc。SimpleDB 中已经实现了Field、IntField、 StringField和Type，只需要支持整数和（固定长度的）字符串字段以及固定长度的 tuples。 实现 Catalog 。 实现BufferPool构造函数和getPage()方法。 实现访问方法、HeapPa"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://hyeee.me/img/og_image.png"><meta property="article:published_time" content="2023-10-30T14:25:46.000Z"><meta property="article:modified_time" content="2023-10-30T14:25:46.000Z"><meta property="article:author" content="Hyeee"><meta property="article:tag" content="Java"><meta property="article:tag" content="DataBase"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://hyeee.me/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://hyeee.me/2023/10/30/SimpleDB-Lab1/"},"headline":"SimpleDB-Lab1","image":["http://hyeee.me/img/og_image.png"],"datePublished":"2023-10-30T14:25:46.000Z","dateModified":"2023-10-30T14:25:46.000Z","author":{"@type":"Person","name":"Hyeee"},"publisher":{"@type":"Organization","name":"Hyeee's Home","logo":{"@type":"ImageObject","url":"http://hyeee.me/img/logo_pikachu.svg"}},"description":"0.实验目标完成本实验后，要能通过ScanTest系统测试  实现管理Tuple的类，即Tuple、TupleDesc。SimpleDB 中已经实现了Field、IntField、 StringField和Type，只需要支持整数和（固定长度的）字符串字段以及固定长度的 tuples。 实现 Catalog 。 实现BufferPool构造函数和getPage()方法。 实现访问方法、HeapPa"}</script><link rel="canonical" href="http://hyeee.me/2023/10/30/SimpleDB-Lab1/"><link rel="icon" href="/img/pikachu.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/archives">时间轴</a><a class="navbar-item" href="/categories">归档</a><a class="navbar-item" href="/tags">标签</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2023-10-30T14:25:46.000Z" title="2023/10/30 22:25:46">2023-10-30</time>发表</span><span class="level-item"><time dateTime="2023-10-30T14:25:46.000Z" title="2023/10/30 22:25:46">2023-10-30</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></span><span class="level-item">21 分钟读完 (大约3121个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">SimpleDB-Lab1</h1><div class="content"><h2 id="0-实验目标"><a href="#0-实验目标" class="headerlink" title="0.实验目标"></a>0.实验目标</h2><p>完成本实验后，要能通过ScanTest系统测试</p>
+<ul>
+<li>实现管理Tuple的类，即Tuple、TupleDesc。SimpleDB 中已经实现了Field、IntField、 StringField和Type，只需要支持整数和（固定长度的）字符串字段以及固定长度的 tuples。</li>
+<li>实现 Catalog 。</li>
+<li>实现BufferPool构造函数和getPage()方法。</li>
+<li>实现访问方法、HeapPage和HeapFile以及相关的ID类。</li>
+<li>实现操作符SeqScan。</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="1-实现管理Tuple的类"><a href="#1-实现管理Tuple的类" class="headerlink" title="1. 实现管理Tuple的类"></a>1. 实现管理Tuple的类</h2><h3 id="a-要修改的文件"><a href="#a-要修改的文件" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;TupleDesc.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;Tuple.java</li>
+</ul>
+<h3 id="b-实现目标"><a href="#b-实现目标" class="headerlink" title="b. 实现目标"></a>b. 实现目标</h3><ul>
+<li>通过单元测试TupleTest和TupleDescTest。</li>
+<li>其中，modifyRecordId()方法应该失败（暂时不需要实现）。</li>
+</ul>
+<h3 id="c-设计思路"><a href="#c-设计思路" class="headerlink" title="c. 设计思路"></a>c. 设计思路</h3><ul>
+<li><p>Tuple类</p>
+<ul>
+<li><p>构造函数Tuple(TupleDesc td)</p>
+</li>
+<li><p>TupleDesc getTupleDesc()</p>
+<ul>
+<li>增加私有变量TupleDesc td</li>
+</ul>
+</li>
+<li><p>RecordId getRecordId()</p>
+<ul>
+<li>增加私有变量RecordId rid</li>
+</ul>
+</li>
+<li><p>void setRecordId(RecordId rid)</p>
+</li>
+<li><p>void setField(int i, Field f)</p>
+<ul>
+<li>增加私有变量Field数组</li>
+</ul>
+</li>
+<li><p>Field getField(int i)</p>
+</li>
+<li><p>String toString()</p>
+</li>
+<li><p>Iterator&lt;Field&gt; fields()</p>
+</li>
+<li><p>void resetTupleDesc(TupleDesc td)</p>
+</li>
+</ul>
+</li>
+<li><p>TupleDesc类</p>
+<ul>
+<li><p>Iterator&lt;TDItem&gt; iterator()</p>
+</li>
+<li><p>TupleDesc(Type[] typeAr, String[] fieldAr)</p>
+<ul>
+<li>增加私有变量TDItem数组</li>
+</ul>
+</li>
+<li><p>TupleDesc(Type[] typeAr)</p>
+</li>
+<li><p>int numFields()</p>
+</li>
+<li><p>String getFieldName(int i)</p>
+</li>
+<li><p>Type getFieldType(int i)</p>
+</li>
+<li><p>int fieldNameToIndex(String name)</p>
+</li>
+<li><p>int getSize()</p>
+<ul>
+<li>计算所占字节数</li>
+</ul>
+</li>
+<li><p>TupleDesc merge(TupleDesc td1, TupleDesc td2)</p>
+</li>
+<li><p>boolean equals(Object o)</p>
+</li>
+<li><p>int hashCode()</p>
+</li>
+<li><p>String toString()</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-实现Catalog"><a href="#2-实现Catalog" class="headerlink" title="2. 实现Catalog"></a>2. 实现Catalog</h2><h3 id="a-要修改的文件-1"><a href="#a-要修改的文件-1" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;common&#x2F;Catalog.java</li>
+</ul>
+<h3 id="b-实现说明"><a href="#b-实现说明" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><p>需要在Catalog类中支持添加新表，以及获取特定表的信息的功能</p>
+<h3 id="c-实现目标"><a href="#c-实现目标" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试CatalogTest</li>
+</ul>
+<h3 id="d-设计思路"><a href="#d-设计思路" class="headerlink" title="d. 设计思路"></a>d. 设计思路</h3><ul>
+<li>映射集合：将表名映射到表id、将表id映射到表名、将表id映射到表、将表id映射到表主键</li>
+<li>Catalog中存储当前数据库的表。对于SimpleDB，只有一个全局Catalog。<ul>
+<li>构造函数Catalog()</li>
+<li>void addTable(DbFile file, String name, String pkeyField)：在Catalog中插入一张新表，表内容为file，表名为name，主键名为pkeyfield（可为“”）。若表名已存在，则更新表内容。</li>
+<li>int getTableId(String name)：返回指定表名的表的id。</li>
+<li>TupleDesc getTupleDesc(int tableid)：通过表id获取表描述。</li>
+<li>DbFile getDatabaseFile(int tableid)：通过表id获取表。</li>
+<li>… …</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-实现BufferPool的getPage-方法"><a href="#3-实现BufferPool的getPage-方法" class="headerlink" title="3. 实现BufferPool的getPage()方法"></a>3. 实现BufferPool的getPage()方法</h2><h3 id="a-要修改的文件-2"><a href="#a-要修改的文件-2" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;BufferPool.java</li>
+</ul>
+<h3 id="b-实现说明-1"><a href="#b-实现说明-1" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li>没有单元测试，可以在HeapFile实现中测试。</li>
+<li>能够使用DbFile.readPage方法来访问DbFile的页面。</li>
+</ul>
+<h3 id="c-设计思路-1"><a href="#c-设计思路-1" class="headerlink" title="c. 设计思路"></a>c. 设计思路</h3><ul>
+<li><p>BufferPool是缓冲池，存储固定数量的Page。对于SimpleDB，只有一个全局BufferPool。</p>
+<ul>
+<li>numPages：存储的Page的数量。</li>
+<li>构造函数BufferPool(int numPages)</li>
+<li>Page getPage(TransactionId tid, PageId pid, Permissions perm)：获取指定的Page。若在缓冲池中，则直接返回；否则，从磁盘中读取并加入到BufferPool。若BufferPool空间不够，则淘汰掉Page，并将新读入的Page放在淘汰掉的Page的位置。</li>
+<li>… …</li>
+</ul>
+</li>
+<li><p>映射集合：将PageId映射到BPageId，若对应的value为-1则说明BufferPool中没有该Page，需要先读取进BufferPool。</p>
+</li>
+<li><p>Page的List集合：BufferPool中存储的Page，通过BPageId能够直接获取Page</p>
+</li>
+<li><p>pageNum：当前BufferPool中的Page数量，若小于numPages则可以直接将Page加载到BufferPool中，否则需要淘汰Page。</p>
+</li>
+<li><p>需要读入Page时，应该调用BufferPool.getPage。BufferPool中存放着缓存的Page。若需要读取的Page在BufferPool中，就直接返回该页面；否则，通过Catalog.getDatabaseFile()获得DbFile表文件（例如HeapFile），再调用DbFile.readPage()从磁盘中加载需要读取的Page，之后更新BufferPool。</p>
+</li>
+</ul>
+<h2 id="4-实现HeapPage的方法"><a href="#4-实现HeapPage的方法" class="headerlink" title="4. 实现HeapPage的方法"></a>4. 实现HeapPage的方法</h2><h3 id="a-要修改的文件-3"><a href="#a-要修改的文件-3" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;HeapPageId.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;RecordId.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;HeapPage.java</li>
+</ul>
+<h3 id="b-实现说明-2"><a href="#b-实现说明-2" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><p>在HeapPage中实现getNumEmptySlots()和isSlotUsed()方法，这些方法需要在页面头部移动位。可以查看HeapPage或src&#x2F;simpledb&#x2F;HeapFileEncoder.java中提供的其他方法，来了解页面的布局。</p>
+<p>实现页面中Tuple的迭代器，这可能涉及辅助类或数据结构。</p>
+<p>在实现了HeapPage之后，还要为HeapFile编写方法，用于计算文件中的页面数量并从文件中读取页面。然后就能够从存储在磁盘上的文件中获取元组。</p>
+<h3 id="c-实现目标-1"><a href="#c-实现目标-1" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试HeapPageIdTest、RecordIDTest和HeapPageReadTest。</li>
+</ul>
+<h3 id="d-设计思路-1"><a href="#d-设计思路-1" class="headerlink" title="d. 设计思路"></a>d. 设计思路</h3><ul>
+<li><p>HeapPage实现了接口Page，是用堆文件的方式存储Tuple。包括PageId pid，Tuple描述td、指明当前位置是否为空的header（类似位图）、Tuple集合tuples、槽位数量numSlots，还有用于恢复数据的oldData和oldDataLock。</p>
+<ul>
+<li><p>构造函数HeapPage(HeapPageId id, byte[] data)：给变量pid、td、numSlots赋值。data通过流解析：前header.length位是header，指明该Page中的header.length条记录（元组）是否有效；之后是Tuples，每个Tuple占td.getSize()位。读取完数据后关闭流dis。最后调用setBeforeImage()，将Page中的数据存档在oldData中，用于数据恢复。</p>
+</li>
+<li><p>HeapPage getBeforeImage()：返回一个新的HeapPage对象，其中的内容是oldData中的存档信息，用于数据恢复。</p>
+</li>
+<li><p>void setBeforeImage()：将Page中的数据备份到oldData中，作为一个存档，用于数据恢复。</p>
+</li>
+<li><p>Tuple readNextTuple(DataInputStream dis, int slotId)：通过流dis读取Page中第slotId个元组的数据，返回读取到的元组以Tuple形式返回。若第slotId位为空，则从dis中读td.getSize()位（该表中单个元组的大小），然后返回null；否则创建新的Tuple，并设置RecordId，之后调用Type.parse方法得到Field，并通过Tuple.setFiled设置元组的数值，最后返回该Tuple。</p>
+</li>
+<li><p>byte[] getPageData()：生成一个byte数组来表示Page中的所有数据，用于序列化这个Page存放到磁盘上。</p>
+<ul>
+<li>创建一个ByteArrayOutputStream名为baos，长度为PageSize。再创建一个DataOutputStream向baos写入Bytes。首先写入header，之后对于每个元组，若元组为空则写入td.getSize()（一个元组的长度）个0；否则遍历元组内的Field，调用Field.serialize()写入输出流。将除了header、元组外的剩余位置都补0，最后刷新到输出流，返回baos.toByteArray()，也就是最后的字节数组。</li>
+</ul>
+</li>
+<li><p>byte[] createEmptyPageData()：静态方法，生成一个空的PageData的字节数组。</p>
+</li>
+</ul>
+</li>
+<li><p>HeapPage的header是byte[]类型，因此大小为ceil(numSlots&#x2F;8)。isSlotUsed()方法需要进行位运算。</p>
+</li>
+<li><p>HeapPage的迭代器需要自定义，因为中间可能有空位，需要跳过null获得下一个元组。</p>
+</li>
+</ul>
+<h2 id="5-实现HeapFile的方法"><a href="#5-实现HeapFile的方法" class="headerlink" title="5. 实现HeapFile的方法"></a>5. 实现HeapFile的方法</h2><h3 id="a-要修改的文件-4"><a href="#a-要修改的文件-4" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;HeapFile.java</li>
+</ul>
+<h3 id="b-实现说明-3"><a href="#b-实现说明-3" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><p>从磁盘读取页面，首先需要计算文件中的正确偏移量。（提示：为了在任意偏移量处读取和写入页面，你需要对文件进行随机访问。在从磁盘读取页面时，不应调用BufferPool的方法。）</p>
+<p>还需要实现HeapFile.iterator()方法，该方法应遍历HeapFile中每个页面的元组。迭代器必须使用BufferPool.getPage()方法来访问HeapFile中的页面。该方法将页面加载到缓冲池中，并最终用于实现基于锁的并发控制和恢复（在后续的实验中）。不要在open()调用时将整个表加载到内存中，若表非常大会导致内存错误。</p>
+<h3 id="c-实现目标-2"><a href="#c-实现目标-2" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试HeapFileReadTest。</li>
+</ul>
+<h3 id="d-设计思路-2"><a href="#d-设计思路-2" class="headerlink" title="d. 设计思路"></a>d. 设计思路</h3><ul>
+<li><p>DbFile是表述单张表的数据结构，能够获取到表在磁盘上存储的具体Pages，并且遍历表的元组。每个DbFild都是通过缓存池来获取的。</p>
+<ul>
+<li>Page readPage(PageId id)：从磁盘中读取指定的Page。</li>
+<li>void writePage(Page p)：将指定的Page写入磁盘。</li>
+<li>List&lt;Page&gt; insertTuple(TransactionId tid, Tuple t)：将指定的tuple插入表中，返回被修改的Page的List。</li>
+<li>List&lt;Page&gt; deleteTuple(TransactionId tid, Tuple t)：从表中移除指定的tuple，返回被修改的Page的List。</li>
+<li>DbFileIterator iterator(TransactionId tid)：返回一个能够遍历所有元组的迭代器（通过BufferPool的getPage实现）。</li>
+<li>int getId()：返回这个DbFile在Catalog中的ID。</li>
+<li>TupleDesc getTupleDesc()：返回这个表的TupleDesc。</li>
+</ul>
+</li>
+<li><p>int numPages()：HeapFile中包含的Page数量，为文件大小除PageSize向上取整。</p>
+</li>
+<li><p>Page readPage(PageId pid)：主要参考TestUtil中的readFileBytes(String path)方法，从文件中读取data。之后调用构造函数HeapPage(pid, data)创建HeapPage对象并返回。</p>
+</li>
+<li><p>DbFileIterator iterator(TransactionId tid)：对HeapFile中的所有元组进行遍历。</p>
+<ul>
+<li><p>DbFileIterator是一个接口，可以看作一个扩展的迭代器。</p>
+<ul>
+<li>void open()：打开迭代器，打开之前无法获取迭代器中的内容。</li>
+<li>boolean hasNext()：是否有下一项。</li>
+<li>Tuple next()：返回下一个元组并使迭代器向后移一位。</li>
+<li>void rewind()：重设迭代器，使其返回开头。</li>
+<li>void close()：关闭迭代器，关闭后无法获取下一项内容。</li>
+</ul>
+</li>
+<li><p>这里对DbFileIterator的实现类之一AbstractDbFileIterator进行实现。由于AbstractDbFileIterator是抽象类，因此需要实现抽象方法readNext()以及没有实现的父类方法open()和rewind()。</p>
+<ul>
+<li>在AbstractDbFileIterator实现类中，新增两个变量tupleIterator和currentPage，分别是Page内的迭代器以及当前的Page。这是由于HeapPage中实现了对元组的迭代器，因此可以直接通过迭代器遍历Page内元组。</li>
+<li>若迭代器遍历到该Page最后一项，则需要查看是否还有下一页。若有，则更新currentPage和迭代器tupleIterator；否则返回null。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="6-实现Operator"><a href="#6-实现Operator" class="headerlink" title="6. 实现Operator"></a>6. 实现Operator</h2><h3 id="a-要修改的文件-5"><a href="#a-要修改的文件-5" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;SeqScan.java</li>
+</ul>
+<h3 id="b-实现说明-4"><a href="#b-实现说明-4" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><p>该操作符按顺序扫描由构造函数中的tableid指定的表的所有页面中的元组。该操作符应通过DbFile.iterator()方法访问元组。</p>
+<h3 id="c-实现目标-3"><a href="#c-实现目标-3" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过系统测试ScanTest</li>
+</ul>
+<h3 id="d-设计思路-3"><a href="#d-设计思路-3" class="headerlink" title="d. 设计思路"></a>d. 设计思路</h3><ul>
+<li>从实现角度来说不难，创建变量tid、tableId、tableAlias分别为事务编号、表号和表的别名。</li>
+<li>TupleDesc getTupleDesc()：返回带有别名的表描述。创建新的Type[]和String[]，用原本的表描述（通过表号查询得到）来给变量赋值。</li>
+<li>hasNext()、next()等一系列Iterator相关方法：通过获取HeapFile的iterator实现。本质上是检测之前的Iterator的正确性。</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><ul>
+<li><p>实现不难，但是Iterator相关测试一直报错。一路查上去发现是之前的一些文件没写正确，但是当时的Test过于简单因此没查出问题。</p>
+</li>
+<li><p>由于SeqScan的Iterator就是调用HeapFile的iterator实现，因此重新查看HeapFileReadTest。与Iterator相关的测试为testIteratorBasic()，但是只测了三个元组，测试过于简单。用该测试测试505条元组后开始报错。一个Page中最多存放504个元组，这说明对于多个Page的HeapFile读取有误。</p>
+</li>
+<li><p>重新查看对HeapPageReadTest，发现不论怎么修改测试数据结果均正确，说明对Page内的元组的读写无误。那么问题应该出在HeapFile与HeapPage的数据传输上。</p>
+<ul>
+<li>HeapFile是整个表的抽象，有file变量指向数据在磁盘具体位置，但是并不会保存具体的Page。当用户需要查询Page时，首先通过BufferPool的readPage查看Page是否在缓冲池中，若在则直接返回该Page；否则调用表文件HeapFile的readPage，从磁盘中读入Page，并更新缓冲池信息。</li>
+<li>因此问题出在HeapFile的readPage()方法中。经查看，原本的方法一次性读入了全部文件并直接传入HeapPage的构造方法，返回新创建的HeapPage。进行更正后，输入流首先根据PageId，跳过之前的Page，读取PageSize个字节存入data，再将data传入HeapPage的构造方法创建新的HeapPage。</li>
+</ul>
+</li>
+<li><p>更正完成后，测试通过。</p>
+</li>
+</ul>
+</div><div class="article-licensing box"><div class="licensing-title"><p>SimpleDB-Lab1</p><p><a href="http://hyeee.me/2023/10/30/SimpleDB-Lab1/">http://hyeee.me/2023/10/30/SimpleDB-Lab1/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Hyeee</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2023-10-30</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2023-10-30</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Java/">Java</a><a class="link-muted mr-2" rel="tag" href="/tags/DataBase/">DataBase</a></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2023/11/05/SimpleDB-Lab2/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">SimpleDB-Lab2</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2023/10/15/SimpleDB%E9%A1%B9%E7%9B%AE%E6%80%BB%E8%A7%88/"><span class="level-item">SimpleDB项目总览</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><!--!--></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1 is-sticky"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-14T13:25:26.000Z">2024-02-14</time></p><p class="title"><a href="/2024/02/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86/">计算机网络知识点整理</a></p><p class="categories"><a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">计算机基础</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-02T07:32:46.000Z">2024-02-02</time></p><p class="title"><a href="/2024/02/02/Icarus%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/">Icarus主题美化</a></p><p class="categories"><a href="/categories/%E5%85%B6%E4%BB%96/">其他</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-22T14:25:46.000Z">2023-12-22</time></p><p class="title"><a href="/2023/12/22/SimpleDB-Lab6/">SimpleDB-Lab6</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-14T14:25:46.000Z">2023-12-14</time></p><p class="title"><a href="/2023/12/14/SimpleDB-Lab5/">SimpleDB-Lab5</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-08T14:25:46.000Z">2023-12-08</time></p><p class="title"><a href="/2023/12/08/SimpleDB-Lab4/">SimpleDB-Lab4</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%A1%86%E6%9E%B6/"><span class="level-start"><span class="level-item">框架</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA/"><span class="level-start"><span class="level-item">算法导论</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">计算机基础</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E9%A1%B9%E7%9B%AE/"><span class="level-start"><span class="level-item">项目</span></span><span class="level-end"><span class="level-item tag">10</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/C/"><span class="tag">C#</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/C/"><span class="tag">C++</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/DataBase/"><span class="tag">DataBase</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Django/"><span class="tag">Django</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">8</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JavaScript/"><span class="tag">JavaScript</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Lombok/"><span class="tag">Lombok</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MyBatis/"><span class="tag">MyBatis</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MySQL/"><span class="tag">MySQL</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spring/"><span class="tag">Spring</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/c/"><span class="tag">c++</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/git/"><span class="tag">git</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/maven/"><span class="tag">maven</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/nexo/"><span class="tag">nexo</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%AE%A1%E7%BD%91/"><span class="tag">计网</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/02/"><span class="level-start"><span class="level-item">二月 2024</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/12/"><span class="level-start"><span class="level-item">十二月 2023</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/11/"><span class="level-start"><span class="level-item">十一月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/10/"><span class="level-start"><span class="level-item">十月 2023</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/09/"><span class="level-start"><span class="level-item">九月 2023</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/08/"><span class="level-start"><span class="level-item">八月 2023</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/05/"><span class="level-start"><span class="level-item">五月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/04/"><span class="level-start"><span class="level-item">四月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/02/"><span class="level-start"><span class="level-item">二月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/08/"><span class="level-start"><span class="level-item">八月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/02/"><span class="level-start"><span class="level-item">二月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/01/"><span class="level-start"><span class="level-item">一月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/12/"><span class="level-start"><span class="level-item">十二月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/09/"><span class="level-start"><span class="level-item">九月 2020</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/04/"><span class="level-start"><span class="level-item">四月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/12/"><span class="level-start"><span class="level-item">十二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/05/"><span class="level-start"><span class="level-item">五月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/04/"><span class="level-start"><span class="level-item">四月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/02/"><span class="level-start"><span class="level-item">二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></div></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a><p class="is-size-7"><span>&copy; 2024 Hyeee</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

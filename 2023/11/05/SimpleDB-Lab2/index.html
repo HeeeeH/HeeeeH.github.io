@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>SimpleDB-Lab2 - Hyeee&#039;s Home</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Hyeee&#039;s Home"><meta name="msapplication-TileImage" content="/img/pikachu.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hyeee&#039;s Home"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="0.实验目标实验二需要为SimpleDB编写一组操作符，用于实现表的修改（例如，插入和删除记录），选择操作，连接操作和聚合操作。这些操作将在Lab 1中所编写的基础上构建。此外，需要设计页面淘汰策略，完善缓冲池。仍不需要实现事务和锁。 可以使用提供的SQL解析器对数据库运行SQL查询。  实现Filter和Join操作符。这些操作符的Javadoc注释中包含了其工作细节。Project和Order"><meta property="og:type" content="blog"><meta property="og:title" content="SimpleDB-Lab2"><meta property="og:url" content="http://hyeee.me/2023/11/05/SimpleDB-Lab2/"><meta property="og:site_name" content="Hyeee&#039;s Home"><meta property="og:description" content="0.实验目标实验二需要为SimpleDB编写一组操作符，用于实现表的修改（例如，插入和删除记录），选择操作，连接操作和聚合操作。这些操作将在Lab 1中所编写的基础上构建。此外，需要设计页面淘汰策略，完善缓冲池。仍不需要实现事务和锁。 可以使用提供的SQL解析器对数据库运行SQL查询。  实现Filter和Join操作符。这些操作符的Javadoc注释中包含了其工作细节。Project和Order"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://hyeee.me/img/og_image.png"><meta property="article:published_time" content="2023-11-05T14:25:46.000Z"><meta property="article:modified_time" content="2023-11-05T14:25:46.000Z"><meta property="article:author" content="Hyeee"><meta property="article:tag" content="Java"><meta property="article:tag" content="DataBase"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://hyeee.me/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://hyeee.me/2023/11/05/SimpleDB-Lab2/"},"headline":"SimpleDB-Lab2","image":["http://hyeee.me/img/og_image.png"],"datePublished":"2023-11-05T14:25:46.000Z","dateModified":"2023-11-05T14:25:46.000Z","author":{"@type":"Person","name":"Hyeee"},"publisher":{"@type":"Organization","name":"Hyeee's Home","logo":{"@type":"ImageObject","url":"http://hyeee.me/img/logo_pikachu.svg"}},"description":"0.实验目标实验二需要为SimpleDB编写一组操作符，用于实现表的修改（例如，插入和删除记录），选择操作，连接操作和聚合操作。这些操作将在Lab 1中所编写的基础上构建。此外，需要设计页面淘汰策略，完善缓冲池。仍不需要实现事务和锁。 可以使用提供的SQL解析器对数据库运行SQL查询。  实现Filter和Join操作符。这些操作符的Javadoc注释中包含了其工作细节。Project和Order"}</script><link rel="canonical" href="http://hyeee.me/2023/11/05/SimpleDB-Lab2/"><link rel="icon" href="/img/pikachu.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/archives">时间轴</a><a class="navbar-item" href="/categories">归档</a><a class="navbar-item" href="/tags">标签</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2023-11-05T14:25:46.000Z" title="2023/11/5 22:25:46">2023-11-05</time>发表</span><span class="level-item"><time dateTime="2023-11-05T14:25:46.000Z" title="2023/11/5 22:25:46">2023-11-05</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></span><span class="level-item">28 分钟读完 (大约4232个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">SimpleDB-Lab2</h1><div class="content"><h2 id="0-实验目标"><a href="#0-实验目标" class="headerlink" title="0.实验目标"></a>0.实验目标</h2><p>实验二需要为SimpleDB编写一组操作符，用于实现表的修改（例如，插入和删除记录），选择操作，连接操作和聚合操作。这些操作将在Lab 1中所编写的基础上构建。此外，需要设计页面淘汰策略，完善缓冲池。仍不需要实现事务和锁。</p>
+<p>可以使用提供的SQL解析器对数据库运行SQL查询。</p>
+<ul>
+<li>实现Filter和Join操作符。这些操作符的Javadoc注释中包含了其工作细节。Project和OrderBy已实现，这可能有助于您理解其他操作符的工作方式。</li>
+</ul>
+<span id="more"></span>
+
+<ul>
+<li>实现IntegerAggregator和StringAggregator。需要编写逻辑来计算在一系列输入元组中，跨多个分组计算特定字段的聚合结果。由于SimpleDB仅支持整数，所以在计算平均值时请使用整数除法。StringAggregator仅需要支持COUNT聚合操作，因为其他操作对于字符串没有意义。</li>
+<li>实现Aggregate操作符。和其他运算符一样，聚合运算符实现了 OpIterator 接口，这样它们就可以放在 SimpleDB 查询计划中。注意Aggregate运算符的输出是每次调用next()时整个组的聚合值，并且聚合构造器需要聚合和分组字段。</li>
+<li>在 BufferPool 中实现与元组插入、删除和页面驱逐有关的方法。在这一点上，你不需要担心 transactions 的问题。</li>
+<li>实现插入和删除操作符。像所有的操作符一样，Insert和Delete实现了OpIterator，接受一个要插入或删除的 tuple 流，并输出一个带有整数字段的单一 tuple ，表示插入或删除的 tuple 数量。这些操作者将需要调用BufferPool中的适当方法，这些方法实际上是修改磁盘上的页面。检查插入和删除 tuple 的测试是否正常工作。</li>
+</ul>
+<p>P.S. 请注意，SimpleDB没有实现任何类型的一致性或完整性检查，所以有可能在文件中插入重复的记录，也没有办法强制执行主键或外键约束。</p>
+<h2 id="1-Filter-and-Join"><a href="#1-Filter-and-Join" class="headerlink" title="1. Filter and Join"></a>1. Filter and Join</h2><h3 id="a-要修改的文件"><a href="#a-要修改的文件" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;Predicate.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;JoinPredicate.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;Filter.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;Join.java</li>
+</ul>
+<h3 id="b-实现说明"><a href="#b-实现说明" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>SimpleDB OpIterator类实现了关系代数的操作，现在需要实现两个运算符，使你能够执行比表扫描更有趣的查询。</p>
+</li>
+<li><p>Filter: 这个操作符只返回满足 “谓词 “的 tuple ，”谓词 “是作为其构造函数的一部分指定的。因此，它过滤掉任何不符合谓词的 tuple 。</p>
+</li>
+<li><p>Join: 这个操作符根据作为其构造函数一部分传入的 “JoinPredicate “来连接其两个子代的 tuple 。我们只需要一个简单的嵌套循环连接，但你可以探索更有趣的连接实现。在你的实验报告中描述你的实现。</p>
+</li>
+</ul>
+<h3 id="c-实现目标"><a href="#c-实现目标" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试 PredicateTest、JoinPredicateTest、FilterTest 和 JoinTest </li>
+<li>通过系统测试 FilterTest 和 JoinTest</li>
+</ul>
+<h3 id="d-设计思路"><a href="#d-设计思路" class="headerlink" title="d. 设计思路"></a>d. 设计思路</h3><ul>
+<li><p>Predicate类，即“谓词”，是用来辅助实现Filter操作的。构造函数中需要三个参数：需要进行比较tuple中的field的编号field、比较的操作符op（等于、大于等）、进行比较的值operand。</p>
+</li>
+<li><p>举个例子，当需要过滤出第2列大于200的tuple时，可以创建Predicate(field&#x3D;2, op&#x3D;GREATER_THAN, operand&#x3D;200)</p>
+</li>
+<li><p>Predicate类的filter方法，传入一个tuple，返回该tuple是否满足“谓词条件”。</p>
+</li>
+<li><p>Filter类，继承了抽象类Operator。用来过滤出符合“谓词条件”的tuple，”谓词 “是作为其构造函数的一部分指定的。</p>
+</li>
+<li><p>可以看做一个自定义的迭代器，通过调用fetchNext()来获取符合要求的下一个tuple。</p>
+</li>
+<li><p>JoinPredicate类，与Predicate类类似，用来辅助Join操作。</p>
+</li>
+<li><p>JoinPredicate类的filter方法，传入两个tuple，返回这两个tuple是否满足“谓词条件”。</p>
+</li>
+<li><p>Join类，继承了抽象类Operator。用来将两张表进行连接。当且仅当表A与表B中的指定列的field的值相同时才连接。并且返回的tuple不去除重复的field值。</p>
+</li>
+<li><p>可以看做一个自定义的迭代器，通过调用fetchNext()来获取符合要求的下一个tuple。</p>
+</li>
+</ul>
+<h3 id="e-实现说明"><a href="#e-实现说明" class="headerlink" title="e. 实现说明"></a>e. 实现说明</h3><ul>
+<li>参考OrderBy和Project类进行实现。</li>
+<li>通过所有单元测试和系统测试。</li>
+</ul>
+<h2 id="2-Aggregates"><a href="#2-Aggregates" class="headerlink" title="2. Aggregates"></a>2. Aggregates</h2><h3 id="a-要修改的文件-1"><a href="#a-要修改的文件-1" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;IntegerAggregator.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;StringAggregator.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;Aggregate.java</li>
+</ul>
+<h3 id="b-实现说明-1"><a href="#b-实现说明-1" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li>一个额外的SimpleDB操作符用GROUP BY子句实现了基本的SQL聚合。你应该实现五个SQL聚合（COUNT, SUM, AVG, MIN, MAX）并支持分组。你只需要支持单个字段的聚合，以及单个字段的分组。</li>
+<li>为了计算聚合，我们使用一个Aggregator接口，将一个新元组合并到现有的聚合计算中。在构建过程中，Aggregator被告知它应该使用什么操作来进行聚合。随后，客户端代码应该为子迭代器中的每个元组调用Aggregator.mergeTupleIntoGroup()。在所有 tuple 被合并后，客户端可以检索到一个聚合结果的OpIterator。结果中的每个元组都是一对形式为(groupValue, aggregateValue)的元组，除非group by字段的值是Aggregator.NO_GROUPING，在这种情况下，结果是一个形式为(aggregateValue)的单一元组。</li>
+<li>请注意，这个实现需要的空间与不同组的数量成线性关系。在本实验中，你不需要担心组的数量超过可用内存的情况。</li>
+</ul>
+<h3 id="c-实现目标-1"><a href="#c-实现目标-1" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试IntegerAggregatorTest、StringAggregatorTest和AggregateTest</li>
+<li>通过系统测试AggregateTest</li>
+</ul>
+<h3 id="d-设计思路-1"><a href="#d-设计思路-1" class="headerlink" title="d. 设计思路"></a>d. 设计思路</h3><ul>
+<li><p>Aggregate用来实现聚合操作（COUNT, SUM, AVG, MIN, MAX）的，并支持分组。</p>
+</li>
+<li><p>构造函数中需要传入参数：tuple迭代器child（遍历表中的每个元组）、进行聚合的列号afield、需要分组的列号gfield和聚合的符号aop。</p>
+</li>
+<li><p>Aggregator是一个接口，有IntegerAggregator和StringAggregator两个实现</p>
+</li>
+<li><p>void mergeTupleIntoGroup(Tuple)将传入的tuple加入到当前的聚合中。</p>
+</li>
+<li><p>OpIterator iterator()返回聚合结果的迭代器</p>
+</li>
+<li><p>主要是通过Map&lt;Field, Tuple&gt;将group field值映射到tuple，也就是分组的每个值对应一个tuple。若没有进行分组，则将field值置为null，放入map中。</p>
+</li>
+<li><p>目前是在每次调用mergeTupleIntoGroup()时更新map。</p>
+</li>
+<li><p>也可以保存max、min、sum、count等中间结果，等到OpIterator的open()时再统一添加tuple。</p>
+</li>
+<li><p>IntegerAggregator的实现有点粗糙：为了实时更新AVG的结果，需要知道sum和count的结果，每次重新计算平均值，因此另外设计了两个Map，来存放每个分组的sum和count。</p>
+</li>
+<li><p>通过所有单元测试和系统测试。</p>
+</li>
+</ul>
+<h2 id="3-HeapFile-Mutability"><a href="#3-HeapFile-Mutability" class="headerlink" title="3. HeapFile Mutability"></a>3. HeapFile Mutability</h2><h3 id="a-要修改的文件-2"><a href="#a-要修改的文件-2" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;HeapPage.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;HeapFile.java</li>
+</ul>
+<p>(Note that you do not necessarily need to implement writePage at this point).</p>
+<h3 id="b-实现说明-2"><a href="#b-实现说明-2" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>现在将开始实现支持修改表格的方法。我们从单个页面和文件的层面开始。有两组主要的操作：添加 tuple 和删除 tuple 。</p>
+</li>
+<li><p><strong>删除 tuple</strong>：要删除一个 tuple ，你需要实现deleteTuple。元组包含记录ID，允许你找到它们所在的页面，所以这应该很简单，只要找到元组所属的页面并适当地修改页面的标题。</p>
+</li>
+<li><p><strong>添加 tuple</strong>：HeapFile.java中的insertTuple方法负责向一个堆文件添加元组。要向HeapFile添加一个新元组，你必须找到一个有空槽的页面。如果HeapFile中没有这样的页面存在，你需要创建一个新的页面并将其追加到磁盘上的物理文件中。你将需要确保元组中的RecordID被正确地更新。</p>
+</li>
+<li><p>为了实现HeapPage，你需要为insertTuple()和deleteTuple()等方法修改标题位图。你可能会发现，我们在实验1中要求你实现的getNumEmptySlots()和isSlotUsed()方法可以作为有用的抽象方法。请注意，有一个markSlotUsed方法作为抽象，用来修改页眉中元组的填充或清除状态。</p>
+</li>
+<li><p>注意，重要的是，HeapFile.insertTuple()和HeapFile.deleteTuple()方法要使用BufferPool.getPage()方法访问页面；否则，你在下一个实验的事务实现将不能正常工作。</p>
+</li>
+<li><p>在src&#x2F;simpledb&#x2F;BufferPool.java中实现insertTuple()和deleteTuple()。</p>
+</li>
+<li><p>这些方法应该调用HeapFile中属于被修改的表的适当方法（这个额外的间接层次是需要的，以便在未来支持其他类型的文件（例如索引））。</p>
+</li>
+</ul>
+<h3 id="c-实现目标-2"><a href="#c-实现目标-2" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试HeapPageWriteTest、HeapFileWriteTest和BufferPoolWriteTest</li>
+</ul>
+<h3 id="d-实现说明"><a href="#d-实现说明" class="headerlink" title="d. 实现说明"></a>d. 实现说明</h3><ul>
+<li><p>HeapPage中的插入与删除tuple</p>
+</li>
+<li><p>insertTuple：寻找空闲的槽位，插入新的tuple，并更新这个tuple的recoedId，调用markSlotUsed更新Page信息。</p>
+</li>
+<li><p>deleteTuple：调用markSlotUsed更新Page信息。</p>
+</li>
+<li><p>HeapFile中的插入与删除tuple</p>
+</li>
+<li><p>insertTuple：若有空闲的Page，则调用该Page的insertTuple插入；否则创建新的Page，再调用Page的insertTuple插入。返回更新过的Page（此处只修改了一个Page）。</p>
+</li>
+<li><p>deleteTuple：根据tuple的recordId信息找到对应的Page，调用Page的deleteTuple删除，并返回返回更新过的Page（此处只修改了一个Page）。</p>
+</li>
+<li><p>BufferPool中的插入与删除tuple</p>
+</li>
+<li><p>insertTuple：调用HeapFile中的insertTuple，并调用updateBufferPool()对BufferPool进行更新。</p>
+</li>
+<li><p>deleteTuple：调用HeapFile中的deleteTuple，并调用updateBufferPool()对BufferPool进行更新。</p>
+</li>
+<li><p>updateBufferPool：自己写的私有函数，用于更新BufferPool中指定的Page信息。对传入的List<Page>，调用markDirty标记为脏页（之后需要写回磁盘）。若BufferPool中没有该页，则加入BufferPool。更新BufferPool中该页为最新传入的Page。</p>
+</li>
+<li><p>参考BTreeFile，实现了writePage()</p>
+</li>
+<li><p>测试BufferPoolWriteTest的handleManyDirtyPages中，首先创建了一个有一页的空Page的HeapFile，之后再加入10页，每页插入一条数据。然后测试文件中是否能读出十条数据。问题在于，HeapFileDuplicates的insertTuple()中是每次在文件中写入一个空页，然后创建一个新的HeapPage，再往HeapPage中插入数据，也就是数据没有写回文件中，仅仅保存在返回值List<Page>中。</p>
+</li>
+<li><p>因此在BufferPool的insertTuple和deleteTuple里加一步更新BufferPool的操作，也就是将修改后发生变化的Page重新更新到BufferPool（但是可以不写回磁盘）</p>
+</li>
+<li><p>但是有个新的问题是，如果更新操作在BufferPool中执行，那么单独调用HeapFile的insertTuple就无法读到最新的Page信息。测试BufferPool的insertTuple中，是先在file中写入新的一页，再插入tuple，因此在HeapFile的insertTuple中对文件进行读写是可行的。因此直接在HeapFile的insertTuple操作中，若之前的Page都满了，则写入新的Page，并直接将新的Page写入磁盘。</p>
+</li>
+<li><p>发现之前的BufferPool有误，更正插入的第一页PageNo为0.</p>
+</li>
+<li><p>通过单元测试HeapPageWriteTest、HeapFileWriteTest和BufferPoolWriteTest</p>
+</li>
+</ul>
+<h2 id="4-Insertion-and-deletion"><a href="#4-Insertion-and-deletion" class="headerlink" title="4. Insertion and deletion"></a>4. Insertion and deletion</h2><h3 id="a-要修改的文件-3"><a href="#a-要修改的文件-3" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;Insert.java</li>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;execution&#x2F;Delete.java</li>
+</ul>
+<h3 id="b-实现说明-3"><a href="#b-实现说明-3" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>现在你已经写好了所有用于添加和删除 tuple 的HeapFile机器，你将实现Insert和Delete操作。对于实现 “插入 “和 “删除 “查询的计划，最上面的运算符是一个特殊的 “插入 “或 “删除 “运算符，它修改了磁盘上的页面。这些操作符返回受影响 tuple 的数量。这是通过返回一个带有一个整数字段的单一元组来实现的，其中包含计数。</p>
+</li>
+<li><p>Insert：这个操作符将它从其子操作符中读取的 tuple 添加到其构造函数中指定的tableid’。它应该使用BufferPool.insertTuple()&#96;方法来做这件事。</p>
+</li>
+<li><p>Delete: 这个操作符从其构造函数中指定的tableid中删除它从其子操作符中读取的 tuple。它应该使用BufferPool.deleteTuple()&#96;方法来做这件事。</p>
+</li>
+</ul>
+<h3 id="c-实现目标-3"><a href="#c-实现目标-3" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试 InsertTest</li>
+<li>通过系统测试 InsertTest  和 DeleteTest</li>
+</ul>
+<h3 id="d-设计思路-2"><a href="#d-设计思路-2" class="headerlink" title="d. 设计思路"></a>d. 设计思路</h3><ul>
+<li>操作符Insert和Delete的fetchNext()通过调用BufferPool中的insertTuple()和deleteTuple()实现。返回值为单个Tuple，TD为INT_TYPE，值为修改的tuple的数量。</li>
+<li>fetchNext()只能调用一次，第二次便返回null。因此设置一个私有变量，标记是否已经完成操作。</li>
+</ul>
+<h2 id="5-Page-eviction"><a href="#5-Page-eviction" class="headerlink" title="5. Page eviction"></a>5. Page eviction</h2><h3 id="a-要修改的文件-4"><a href="#a-要修改的文件-4" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;storage&#x2F;BufferPool.java</li>
+</ul>
+<h3 id="b-实现说明-4"><a href="#b-实现说明-4" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>在实验1中，我们没有正确观察到由构造参数numPages定义的缓冲池中最大页数的限制。现在，你将选择一个页面淘汰策略，并对以前任何读取或创建页面的代码进行编程，以实现你的策略。</p>
+</li>
+<li><p>当缓冲池中的页面超过numPages时，在加载下一个页面之前，应该将一个页面从缓冲池中淘汰。淘汰策略的选择由你决定；没有必要做一些复杂的事情。</p>
+</li>
+<li><p>注意BufferPool要求你实现flushAllPages()方法。这不是你在真正实现缓冲池时需要的东西。然而，我们需要这个方法用于测试。你不应该在任何真正的代码中调用这个方法。</p>
+</li>
+<li><p>由于我们实现ScanTest.cacheTest的方式，你需要确保你的flushPage和flushAllPages方法不从缓冲池中淘汰页面，以正确通过这个测试。</p>
+</li>
+<li><p>flushAllPages应该在BufferPool中的所有页面上调用flushPage，flushPage应该将任何脏页写入磁盘并标记为不脏，同时将其留在BufferPool中。</p>
+</li>
+<li><p>唯一应该从缓冲池中删除页面的方法是evictPage，它应该对它所淘汰的任何脏页面调用flushPage。</p>
+</li>
+<li><p>如果你没有在上面的HeapFile.java中实现writePage()，你也需要在这里实现它。最后，你还应该实现discardPage()，以便从缓冲池中删除一个页面而不写入磁盘。我们不会在本实验中测试discardPage()，但它在未来的实验中是必要的。</p>
+</li>
+</ul>
+<h3 id="c-实现目标-4"><a href="#c-实现目标-4" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过系统测试 EvictionTest</li>
+<li>由于我们不会检查任何特定的驱逐策略，这个测试通过创建一个有16页的BufferPool（注意：虽然DEFAULT_PAGES是50，但我们初始化的BufferPool更少！），扫描一个超过16页的文件，看看JVM的内存使用率是否增加了5MB以上。如果你没有正确地实施淘汰策略，你将无法淘汰足够多的页面，并将超过大小限制，从而导致测试失败。</li>
+</ul>
+<h3 id="d-设计思路-3"><a href="#d-设计思路-3" class="headerlink" title="d. 设计思路"></a>d. 设计思路</h3><ul>
+<li>flushPage()：将脏页写入磁盘，并标记为不脏。（不需要从BufferPool中淘汰该页）</li>
+<li>flushAllPages()：对BufferPool中的所有页面调用flushPage()。</li>
+<li>discardPage()：从BufferPool中删除一个页面，并且不写入磁盘。</li>
+<li>evictPage()：从BufferPool中淘汰一个页面。若为脏页，调用flushPage()将脏页写入磁盘；否则调用discardPage()直接删除页面。</li>
+</ul>
+<h3 id="e-实现说明-1"><a href="#e-实现说明-1" class="headerlink" title="e. 实现说明"></a>e. 实现说明</h3><ul>
+<li>更新了BufferPool，将把PageId映射到BufferPageId的Map更改为LinkedHashMap实现，这样就可以直接按照访存顺序获取到最近最久未访问的页面，便于页面淘汰。</li>
+<li>相应地，将空页面的获取方式更改为了Queue实现。初始时，在队列中加载全部页面，之后每次需要时取出队列的第一个元素，将页面写入该位置的缓存。淘汰页面时，需要更新Queue，将淘汰页面的bpid重新加入Queue。</li>
+</ul>
+<h2 id="6-小结"><a href="#6-小结" class="headerlink" title="6. 小结"></a>6. 小结</h2><ul>
+<li>由于打包前要通过测试，所以一些各个Lab中通过打包实现的一些测试就先略过，最后再统一测试。</li>
+</ul>
+</div><div class="article-licensing box"><div class="licensing-title"><p>SimpleDB-Lab2</p><p><a href="http://hyeee.me/2023/11/05/SimpleDB-Lab2/">http://hyeee.me/2023/11/05/SimpleDB-Lab2/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Hyeee</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2023-11-05</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2023-11-05</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Java/">Java</a><a class="link-muted mr-2" rel="tag" href="/tags/DataBase/">DataBase</a></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2023/12/04/SimpleDB-Lab3/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">SimpleDB-Lab3</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2023/10/30/SimpleDB-Lab1/"><span class="level-item">SimpleDB-Lab1</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><!--!--></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1 is-sticky"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-14T13:25:26.000Z">2024-02-14</time></p><p class="title"><a href="/2024/02/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86/">计算机网络知识点整理</a></p><p class="categories"><a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">计算机基础</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-02T07:32:46.000Z">2024-02-02</time></p><p class="title"><a href="/2024/02/02/Icarus%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/">Icarus主题美化</a></p><p class="categories"><a href="/categories/%E5%85%B6%E4%BB%96/">其他</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-22T14:25:46.000Z">2023-12-22</time></p><p class="title"><a href="/2023/12/22/SimpleDB-Lab6/">SimpleDB-Lab6</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-14T14:25:46.000Z">2023-12-14</time></p><p class="title"><a href="/2023/12/14/SimpleDB-Lab5/">SimpleDB-Lab5</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-08T14:25:46.000Z">2023-12-08</time></p><p class="title"><a href="/2023/12/08/SimpleDB-Lab4/">SimpleDB-Lab4</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%A1%86%E6%9E%B6/"><span class="level-start"><span class="level-item">框架</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA/"><span class="level-start"><span class="level-item">算法导论</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">计算机基础</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E9%A1%B9%E7%9B%AE/"><span class="level-start"><span class="level-item">项目</span></span><span class="level-end"><span class="level-item tag">10</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/C/"><span class="tag">C#</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/C/"><span class="tag">C++</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/DataBase/"><span class="tag">DataBase</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Django/"><span class="tag">Django</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">8</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JavaScript/"><span class="tag">JavaScript</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Lombok/"><span class="tag">Lombok</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MyBatis/"><span class="tag">MyBatis</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MySQL/"><span class="tag">MySQL</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spring/"><span class="tag">Spring</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/c/"><span class="tag">c++</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/git/"><span class="tag">git</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/maven/"><span class="tag">maven</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/nexo/"><span class="tag">nexo</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%AE%A1%E7%BD%91/"><span class="tag">计网</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/02/"><span class="level-start"><span class="level-item">二月 2024</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/12/"><span class="level-start"><span class="level-item">十二月 2023</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/11/"><span class="level-start"><span class="level-item">十一月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/10/"><span class="level-start"><span class="level-item">十月 2023</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/09/"><span class="level-start"><span class="level-item">九月 2023</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/08/"><span class="level-start"><span class="level-item">八月 2023</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/05/"><span class="level-start"><span class="level-item">五月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/04/"><span class="level-start"><span class="level-item">四月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/02/"><span class="level-start"><span class="level-item">二月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/08/"><span class="level-start"><span class="level-item">八月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/02/"><span class="level-start"><span class="level-item">二月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/01/"><span class="level-start"><span class="level-item">一月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/12/"><span class="level-start"><span class="level-item">十二月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/09/"><span class="level-start"><span class="level-item">九月 2020</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/04/"><span class="level-start"><span class="level-item">四月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/12/"><span class="level-start"><span class="level-item">十二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/05/"><span class="level-start"><span class="level-item">五月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/04/"><span class="level-start"><span class="level-item">四月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/02/"><span class="level-start"><span class="level-item">二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></div></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a><p class="is-size-7"><span>&copy; 2024 Hyeee</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

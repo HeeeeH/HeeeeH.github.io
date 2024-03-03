@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>SimpleDB-Lab3 - Hyeee&#039;s Home</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="Hyeee&#039;s Home"><meta name="msapplication-TileImage" content="/img/pikachu.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hyeee&#039;s Home"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="0.实验介绍在这个实验中，你将在SimpleDB之上实现一个查询优化器。主要任务包括实现一个选择性估计框架和一个基于成本的优化器。你可以自由选择具体的实现方式，但我们建议使用类似于课堂上讨论的Selinger基于成本的优化器（第9讲）。  实现TableStats类中的方法，使其能够使用直方图（IntHistogram类提供的骨架）或你设计的其他形式的统计数据来估计过滤器的选择性和扫描的成本。 实"><meta property="og:type" content="blog"><meta property="og:title" content="SimpleDB-Lab3"><meta property="og:url" content="http://hyeee.me/2023/12/04/SimpleDB-Lab3/"><meta property="og:site_name" content="Hyeee&#039;s Home"><meta property="og:description" content="0.实验介绍在这个实验中，你将在SimpleDB之上实现一个查询优化器。主要任务包括实现一个选择性估计框架和一个基于成本的优化器。你可以自由选择具体的实现方式，但我们建议使用类似于课堂上讨论的Selinger基于成本的优化器（第9讲）。  实现TableStats类中的方法，使其能够使用直方图（IntHistogram类提供的骨架）或你设计的其他形式的统计数据来估计过滤器的选择性和扫描的成本。 实"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://hyeee.me/2023/12/04/SimpleDB-Lab3/1699022697588-510d5a22-95bb-46f6-be0e-d6c2d8d7b8f4.png"><meta property="og:image" content="http://hyeee.me/2023/12/04/SimpleDB-Lab3/1699063524701-758e2f02-6f38-4cfc-87b2-2db73779123b.png"><meta property="article:published_time" content="2023-12-04T14:25:46.000Z"><meta property="article:modified_time" content="2023-12-04T14:25:46.000Z"><meta property="article:author" content="Hyeee"><meta property="article:tag" content="Java"><meta property="article:tag" content="DataBase"><meta property="twitter:card" content="summary"><meta property="twitter:image:src" content="http://hyeee.me/2023/12/04/SimpleDB-Lab3/1699022697588-510d5a22-95bb-46f6-be0e-d6c2d8d7b8f4.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://hyeee.me/2023/12/04/SimpleDB-Lab3/"},"headline":"SimpleDB-Lab3","image":["http://hyeee.me/2023/12/04/SimpleDB-Lab3/1699022697588-510d5a22-95bb-46f6-be0e-d6c2d8d7b8f4.png","http://hyeee.me/2023/12/04/SimpleDB-Lab3/1699063524701-758e2f02-6f38-4cfc-87b2-2db73779123b.png"],"datePublished":"2023-12-04T14:25:46.000Z","dateModified":"2023-12-04T14:25:46.000Z","author":{"@type":"Person","name":"Hyeee"},"publisher":{"@type":"Organization","name":"Hyeee's Home","logo":{"@type":"ImageObject","url":"http://hyeee.me/img/logo_pikachu.svg"}},"description":"0.实验介绍在这个实验中，你将在SimpleDB之上实现一个查询优化器。主要任务包括实现一个选择性估计框架和一个基于成本的优化器。你可以自由选择具体的实现方式，但我们建议使用类似于课堂上讨论的Selinger基于成本的优化器（第9讲）。  实现TableStats类中的方法，使其能够使用直方图（IntHistogram类提供的骨架）或你设计的其他形式的统计数据来估计过滤器的选择性和扫描的成本。 实"}</script><link rel="canonical" href="http://hyeee.me/2023/12/04/SimpleDB-Lab3/"><link rel="icon" href="/img/pikachu.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.7.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+
+          const id = '#' + CSS.escape(location.hash.substring(1));
+          const $tabMenu = document.querySelector(`.tabs a[href="${id}"]`);
+          if (!$tabMenu) {
+            return;
+          }
+
+          const $tabMenuContainer = $tabMenu.parentElement.parentElement;
+          Array.from($tabMenuContainer.children).forEach($menu => $menu.classList.remove('is-active'));
+          Array.from($tabMenuContainer.querySelectorAll('a'))
+              .map($menu => document.getElementById($menu.getAttribute("href").substring(1)))
+              .forEach($content => $content.classList.add('is-hidden'));
+
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+          const $activeTab = document.querySelector(id);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.3.0"></head><body class="is-2-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/archives">时间轴</a><a class="navbar-item" href="/categories">归档</a><a class="navbar-item" href="/tags">标签</a></div><div class="navbar-end"><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-8-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2023-12-04T14:25:46.000Z" title="2023/12/4 22:25:46">2023-12-04</time>发表</span><span class="level-item"><time dateTime="2023-12-04T14:25:46.000Z" title="2023/12/4 22:25:46">2023-12-04</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></span><span class="level-item">36 分钟读完 (大约5328个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">SimpleDB-Lab3</h1><div class="content"><h2 id="0-实验介绍"><a href="#0-实验介绍" class="headerlink" title="0.实验介绍"></a>0.实验介绍</h2><p>在这个实验中，你将在SimpleDB之上实现一个查询优化器。主要任务包括实现一个选择性估计框架和一个基于成本的优化器。你可以自由选择具体的实现方式，但我们建议使用类似于课堂上讨论的Selinger基于成本的优化器（第9讲）。</p>
+<ul>
+<li>实现TableStats类中的方法，使其能够使用直方图（IntHistogram类提供的骨架）或你设计的其他形式的统计数据来估计过滤器的选择性和扫描的成本。</li>
+<li>实现JoinOptimizer类中的方法，使其能够估计 join 的成本和选择性。</li>
+<li>编写JoinOptimizer中的orderJoins方法。这个方法必须为一系列的连接产生一个最佳的顺序（可能使用Selinger算法），给定前两个步骤中计算的统计数据。</li>
+</ul>
+<span id="more"></span>
+
+<h3 id="Optimizer-outline"><a href="#Optimizer-outline" class="headerlink" title="Optimizer outline"></a>Optimizer outline</h3><ul>
+<li><p>基于成本的优化器的主要思想是：使用关于表的统计数据来估计不同查询计划的 “成本”。通常情况下，一个计划的成本与中间连接和选择的cardinalities（产生的 tuple 数量），以及过滤器和连接谓词的选择性有关。</p>
+</li>
+<li><p>利用这些统计数据，以最佳方式排列连接和选择，并从几个备选方案中选择连接算法的最佳实现。 在本实室中，你将实现代码以执行这两项功能。</p>
+</li>
+<li><p>优化器将从simpledb&#x2F;Parser.java调用。在开始这个实验之前，你可能希望回顾一下实验2的解析器练习。简而言之，如果你有一个描述你的表的目录文件catalog.txt，你可以通过输入<code>java -jar dist/simpledb.jar parser catalog.txt</code>来运行解析器。</p>
+</li>
+<li><p>当解析器被调用时，它将对所有的表进行统计计算（使用你提供的统计代码）。当一个查询被发出时，解析器将把查询转换成逻辑计划表示，然后调用你的查询优化器来生成一个最佳计划。</p>
+</li>
+<li><p>SimpleDB优化器的整体结构。分析器和优化器的SimpleDB模块的整体控制流程如图1所示。</p>
+</li>
+</ul>
+<p><img src="/2023/12/04/SimpleDB-Lab3/1699022697588-510d5a22-95bb-46f6-be0e-d6c2d8d7b8f4.png" alt="img"></p>
+<ul>
+<li><p>需要实现带有双边框的组件。这些类和方法将在后面的文字中得到更详细的解释（你可能希望回过头来看看这个图），但基本操作如下：</p>
+</li>
+<li><p>Parser.java在初始化时构建了一组表的统计数据（存储在statsMap容器中）。然后它等待一个查询的输入，并对该查询调用parseQuery方法。</p>
+</li>
+<li><p>parseQuery首先构建一个代表解析查询的LogicalPlan，然后在它构建的LogicalPlan实例上调用physicalPlan方法。physicalPlan方法返回一个DBIterator对象，可用于实际运行查询。</p>
+</li>
+<li><p>在接下来的exercise中，你将实现帮助物理计划（physicalPlan）设计出最优计划的方法。</p>
+</li>
+<li><p>成本估计。准确地估计计划成本是相当棘手的。在这个Lab中，我们将只关注连接序列和基本表访问的成本。我们不会担心访问方法的选择（因为我们只有一种访问方法，即表扫描），也不会担心额外运算符（如聚合）的成本。在这个Lab中，你只需要考虑left-deep的计划。接下来会了解你可能实现的额外的 “奖励 “优化器特性，包括处理杂乱计划的方法。</p>
+</li>
+<li><p>我们将以p&#x3D;t1 join t2 join … tn的形式来写连接计划，这表示一个左深连接，其中t1是最左边的连接（树中最深的）。给定一个像p这样的计划，其成本可以表示为：</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scancost(t1) + scancost(t2) + joincost(t1 join t2) +</span><br><span class="line">scancost(t3) + joincost((t1 join t2) join t3) +</span><br><span class="line">... </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这里，scancost(t1)是扫描表t1的I&#x2F;O成本，joincost(t1,t2)是连接t1和t2的CPU成本。为了使I&#x2F;O和CPU成本具有可比性，通常使用一个恒定的比例系数，例如：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cost(predicate application) = <span class="number">1</span></span><br><span class="line">cost(pageScan) = SCALING_FACTOR x <span class="title function_">cost</span><span class="params">(predicate application)</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>在这个实验中，你可以忽略缓存的影响（例如，假设对表的每一次访问都会产生全部的扫描成本）–同样，这也是你可以作为一个可选的额外扩展添加到实验中的东西。因此，scancost(t1)只是t1的页数x SCALING_FACTOR。</p>
+</li>
+<li><p>当使用嵌套循环连接时，记得两个表t1和t2（其中t1是外表）之间的连接成本是简单的。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">joincost(t1 join t2) = scancost(t1) + ntups(t1) x <span class="title function_">scancost</span><span class="params">(t2)</span> <span class="comment">//IO cost</span></span><br><span class="line">                    + ntups(t1) x <span class="title function_">ntups</span><span class="params">(t2)</span>  <span class="comment">//CPU cost</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>此处，ntups(t1)是表t1中 tuples 的数量。</p>
+</li>
+<li><p>ntups可以通过扫描一个基表直接计算出来。对于一个有一个或多个选择谓词的表来说，估计ntups可能比较棘手–这就是过滤器的选择性估计问题。下面是你可能使用的一种方法，基于计算表中的值的直方图。</p>
+</li>
+<li><p>计算表中每个属性的最小值和最大值（通过扫描一次）。</p>
+</li>
+<li><p>为表中的每个属性构建一个直方图。一个简单的方法是使用一个固定数量的桶NumB，每个桶代表直方图属性领域的固定范围内的记录数。例如，如果一个字段f的范围是1到100，有10个桶，那么桶1可能包含1到10之间的记录数，桶2包含11到20之间的记录数，以此类推。</p>
+</li>
+<li><p>再次扫描该表，选择出所有 tuples 的所有字段，用它们来填充每个直方图中的桶的计数。</p>
+</li>
+<li><p>为了估计一个平等表达式f&#x3D;const的选择性，计算包含值const的桶。假设桶的宽度（值的范围）是w，高度（ tuples 的数量）是h，而表中 tuples 的数量是ntups。那么，假设值在整个桶中是均匀分布的，表达式的选择性大致为(h&#x2F;w)&#x2F;ntups，因为(h&#x2F;w)代表的是桶中含有值常数的 tuples 的预期数量。</p>
+</li>
+<li><p>为了估计一个范围表达式f&gt;const的选择性，计算const所在的桶b，其宽度为w_b，高度为h_b。那么，b包含了全部 tuples 中的一部分b_f &#x3D; h_b &#x2F; ntups。假设 tuples 均匀地分布在整个b中，b中大于const的部分b_part是（b_right - const）&#x2F; w_b，其中b_right是b的桶的右端点。因此，b桶对谓词贡献了（b_f x b_part）的选择性。此外，b+1…NumB-1桶贡献了它们所有的选择性（可以用类似于上面b_f的公式来计算）。将所有桶的选择性贡献相加，将产生表达式的整体选择性。图2说明了这个过程。</p>
+</li>
+</ul>
+<p><img src="/2023/12/04/SimpleDB-Lab3/1699063524701-758e2f02-6f38-4cfc-87b2-2db73779123b.png" alt="img"></p>
+<ul>
+<li><p>涉及小于的表达式的选择性可以类似于大于的情况下进行，看下到0的桶。</p>
+</li>
+<li><p>在接下来的两个练习中，你将用代码来执行连接和过滤器的选择性估计。</p>
+</li>
+</ul>
+<h2 id="1-IntHistogram-java"><a href="#1-IntHistogram-java" class="headerlink" title="1. IntHistogram.java"></a>1. IntHistogram.java</h2><h3 id="a-要修改的文件"><a href="#a-要修改的文件" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;optimizer&#x2F;IntHistogram.java</li>
+</ul>
+<h3 id="b-实现说明"><a href="#b-实现说明" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li>你将需要实现一些方法来记录表的统计数据，以便进行选择性估计。我们提供了一个骨架类，IntHistogram，它可以做到这一点。我们的目的是让你使用上面描述的基于桶的方法来计算直方图，但你也可以自由地使用其他方法，只要它能提供合理的选择性估计。</li>
+<li>我们提供了一个StringHistogram类，它使用IntHistogram来计算字符串谓词的选取。如果你想实现一个更好的估计器，你可以修改StringHistogram，尽管你不需要为了完成这个实验而修改。</li>
+</ul>
+<h3 id="c-实现目标"><a href="#c-实现目标" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试 IntHistogramTest（如果你选择不实现基于直方图的选择性估计，你不需要通过这个测试）</li>
+</ul>
+<h3 id="d-实现说明"><a href="#d-实现说明" class="headerlink" title="d. 实现说明"></a>d. 实现说明</h3><ul>
+<li><p>基本按照讲解实现。除了用List保存直方图外，还保存了min_value， max_value、bucket_width和num_tuples，用于计算。</p>
+</li>
+<li><p>当加入或估计的值在min_value和max_value范围之外时，单独进行判断。</p>
+</li>
+</ul>
+<h2 id="2-TableStats-java"><a href="#2-TableStats-java" class="headerlink" title="2. TableStats.java"></a>2. TableStats.java</h2><h3 id="a-要修改的文件-1"><a href="#a-要修改的文件-1" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;optimizer&#x2F;TableStats.java</li>
+</ul>
+<h3 id="b-实现说明-1"><a href="#b-实现说明-1" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>TableStats类包含了计算一个表中 tuples 和页数的方法，以及估计该表字段上的谓词的选择性的方法。我们创建的查询分析器为每个表创建一个TableStats的实例，并将这些结构传递给你的查询优化器（在后面的练习中你会需要它）。</p>
+</li>
+<li><p>你应该在TableStats中填写以下方法和类：</p>
+</li>
+<li><p>实现TableStats构造函数。一旦你实现了跟踪统计的方法，如直方图，你应该实现TableStats构造函数，添加代码来扫描表（可能是多次）以建立你需要的统计。</p>
+</li>
+<li><p>实现 estimateSelectivity(int field, Predicate.Op op, Field constant)。使用你的统计数据（例如，根据字段的类型，使用IntHistogram或StringHistogram），估计predicate字段op常量对表的选择性。</p>
+</li>
+<li><p>实现 estimateScanCost()。这个方法估计顺序扫描文件的成本，考虑到读取一个页面的成本是costPerPageIO。你可以假设没有寻道，也没有页面在缓冲池中。这个方法可以使用你在构造函数中计算的成本或大小。</p>
+</li>
+<li><p>实现 estimateTableCardinality(double selectivityFactor)。该方法返回关系中 tuples 的数量，考虑到应用了具有选择性的selectivityFactor的谓词。这个方法可以使用你在构造函数中计算的成本或大小。</p>
+</li>
+</ul>
+<h3 id="c-实现目标-1"><a href="#c-实现目标-1" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试 TableStatsTest</li>
+</ul>
+<h3 id="d-实现说明-1"><a href="#d-实现说明-1" class="headerlink" title="d. 实现说明"></a>d. 实现说明</h3><ul>
+<li><p>基本参照说明实现。</p>
+</li>
+<li><p>（from chatgpt）setStatsMap()使用反射机制的原因可能是为了绕过 statsMap 字段的访问权限，以便在类的内部方法中直接替换整个 statsMap 对象。通过反射，可以将私有字段的访问权限设置为可访问，然后使用 set() 方法来替换 statsMap 对象，而不是通过普通的字段访问操作符来逐个修改字段的值。</p>
+</li>
+<li><p>TableStats构造函数：先扫描一遍所有tuple得到Field的最大最小值，根据最值创建直方图Histogram。再扫描第二遍，往Histogram中加入value，用于相应的估计。</p>
+</li>
+<li><p>estimateScanCost()：page数量乘上每页的cost。</p>
+</li>
+<li><p>estimateTableCardinality()：tuple数量乘上选择因子。</p>
+</li>
+<li><p>avgSelectivity()：均值没有测试，因此不确定实现的正确性。</p>
+</li>
+<li><p>estimateSelectivity()：根据构造函数创建的直方图，返回估计结果。</p>
+</li>
+<li><p>通过单元测试 TableStatsTest。</p>
+</li>
+</ul>
+<h2 id="3-Join-Cost-Estimation"><a href="#3-Join-Cost-Estimation" class="headerlink" title="3. Join Cost Estimation"></a>3. Join Cost Estimation</h2><h3 id="a-要修改的文件-2"><a href="#a-要修改的文件-2" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;optimizer&#x2F;JoinOptimizer.java</li>
+</ul>
+<h3 id="b-实现说明-2"><a href="#b-实现说明-2" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li><p>观察一下，上面的连接计划p的成本包括形式为joincost((t1 join t2) join t3)的表达。为了评估这个表达式，你需要一些方法来估计t1 join t2的大小（ntups）。这个连接cardinality估计问题比过滤器的选择性估计问题更难。在这个实验中，你不需要为此做任何花哨的事情，尽管第2.4节中的一个可选的练习包括一个基于直方图的连接选择性估计的方法。</p>
+</li>
+<li><p>在实施你的简单解决方案时，你应该牢记以下几点：</p>
+</li>
+<li><p>对于等价连接，当其中一个属性是主键时，由连接产生的 tuples 的数量不能大于非主键属性的cardinality。</p>
+</li>
+<li><p>对于没有主键的等价连接，很难说输出的大小是什么–它可能是表的cardinalities的乘积的大小（如果两个表的所有 tuples 都有相同的值）–或者它可能是0。</p>
+</li>
+<li><p>对于范围扫描，同样也很难对尺寸说得准确。输出的大小应该与输入的大小成正比。假设交叉产物的一个固定部分是由范围扫描发出的（比如，30%），是可以的。一般来说，范围连接的成本应该大于相同大小的两个表的非主键平等连接的成本。</p>
+</li>
+<li><p>JoinOptimizer.java类包括所有用于排序和计算连接成本的方法。在这个练习中，你将写出用于估计 join 的 selectivity 和 cost 的方法，特别是：</p>
+</li>
+<li><p>实现 estimateJoinCost(LogicalJoinNode j, int card1, int card2, double cost1, double cost2) 。这个方法估计了连接j的成本，考虑到左边的输入是cardinality card1，右边的输入是cardinality card2，扫描左边输入的成本是cost1，访问右边输入的成本是card2。你可以假设这个连接是一个NL连接，并应用前面提到的公式。</p>
+</li>
+<li><p>实现 estimateJoinCardinality(LogicalJoinNode j, int card1, int card2, boolean t1pkey, boolean t2pkey) 。这个方法估计了j连接输出的 tuples 数，给定左边的输入是大小为card1，右边的输入是大小为card2，以及指示左边和右边（分别）字段是否唯一（主键）的标志t1pkey和t2pkey。</p>
+</li>
+</ul>
+<h3 id="c-实现目标-2"><a href="#c-实现目标-2" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试JoinOptimizerTest中的 estimateJoinCostTest 和 estimateJoinCardinality</li>
+</ul>
+<h3 id="d-实现说明-2"><a href="#d-实现说明-2" class="headerlink" title="d. 实现说明"></a>d. 实现说明</h3><ul>
+<li>estimateJoinCost()通过公式计算连接的成本。其中，cost1为scancost(t1)，ntups(t1)为card1（表1中tuple与影响因子的乘积）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">joincost(t1 join t2) = scancost(t1) + ntups(t1) x <span class="title function_">scancost</span><span class="params">(t2)</span> <span class="comment">//IO cost</span></span><br><span class="line">                    + ntups(t1) x <span class="title function_">ntups</span><span class="params">(t2)</span>  <span class="comment">//CPU cost</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>estimateJoinCardinality()看文档有点没明白具体实现的算法，参考<a target="_blank" rel="noopener" href="https://cjdhy.blog.csdn.net/article/details/131452331">MIT 6.830 数据库系统</a>实现。</li>
+<li>通过测试。</li>
+</ul>
+<h2 id="4-Join-Cost-Estimation"><a href="#4-Join-Cost-Estimation" class="headerlink" title="4. Join Cost Estimation"></a>4. Join Cost Estimation</h2><h3 id="a-要修改的文件-3"><a href="#a-要修改的文件-3" class="headerlink" title="a. 要修改的文件"></a>a. 要修改的文件</h3><ul>
+<li>src&#x2F;java&#x2F;simpledb&#x2F;optimizer&#x2F;JoinOptimizer.java</li>
+</ul>
+<h3 id="b-实现说明-3"><a href="#b-实现说明-3" class="headerlink" title="b. 实现说明"></a>b. 实现说明</h3><ul>
+<li>现在你已经实现了估计成本的方法，你将实现Selinger优化器。对于这些方法，连接被表达为一个连接节点的列表（例如，对两个表的谓词），而不是课堂上描述的连接关系的列表。将讲座中给出的算法转化为上述的连接节点列表形式，伪代码的概要是：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">j = set of join nodes</span><br><span class="line"><span class="title function_">for</span> <span class="params">(i in <span class="number">1.</span>..|j|)</span>:</span><br><span class="line">    <span class="keyword">for</span> s in &#123;all length i subsets of j&#125;</span><br><span class="line">      bestPlan = &#123;&#125;</span><br><span class="line">      <span class="keyword">for</span> s<span class="string">&#x27; in &#123;all length d-1 subsets of s&#125;</span></span><br><span class="line"><span class="string">           subplan = optjoin(s&#x27;</span>)</span><br><span class="line">           plan = best way to <span class="title function_">join</span> <span class="params">(s-s<span class="string">&#x27;) to subplan</span></span></span><br><span class="line"><span class="string"><span class="params">           if (cost(plan) &lt; cost(bestPlan))</span></span></span><br><span class="line"><span class="string"><span class="params">              bestPlan = plan</span></span></span><br><span class="line"><span class="string"><span class="params">      optjoin(s) = bestPlan</span></span></span><br><span class="line"><span class="string"><span class="params"> return optjoin(j)</span></span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>为了帮助你实现这个算法，我们提供了几个类和方法来帮助你。</p>
+</li>
+<li><p>首先，JoinOptimizer.java中的enumerateSubsets(List v, int size)方法将返回一个大小为v的所有子集的集合。这个方法对于大型集合来说效率非常低；你可以通过实现一个更有效的枚举器来获得额外的分数（提示：考虑使用原地生成算法和懒惰迭代器（或流）接口来避免物化整个幂集）。</p>
+</li>
+<li><p>第二，我们提供了方法computeCostAndCardOfSubplan。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> CostCard <span class="title function_">computeCostAndCardOfSubplan</span><span class="params">(Map&lt;String, TableStats&gt; stats, </span></span><br><span class="line"><span class="params">                                                Map&lt;String, Double&gt; filterSelectivities, </span></span><br><span class="line"><span class="params">                                                LogicalJoinNode joinToRemove,  </span></span><br><span class="line"><span class="params">                                                Set&lt;LogicalJoinNode&gt; joinSet,</span></span><br><span class="line"><span class="params">                                                <span class="type">double</span> bestCostSoFar,</span></span><br><span class="line"><span class="params">                                                PlanCache pc)</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>给出一个连接的子集（joinSet），以及一个要从这个子集中移除的连接（joinToRemove），这个方法计算出将joinToRemove连接到joinSet-{joinToRemove}的最佳方法。它在一个CostCard对象中返回这个最佳方法，其中包括成本、cardinality和最佳连接顺序（作为一个列表）。如果找不到计划（因为，例如，没有可能的左深连接），或者如果所有计划的成本都大于bestCostSoFar参数，computeCostAndCardOfSubplan可能返回null。该方法使用了一个叫做pc（上面的psuedocode中的optjoin）的先前连接的缓存来快速查找joinSet的最快方式–{joinToRemove}。其他参数（stats和filterSelectivities）被传递到你必须实现的orderJoins方法中，作为练习4的一部分，下面会有解释。这个方法基本上是执行前面描述的假代码的第6-8行。</p>
+</li>
+<li><p>第三，我们提供了方法printJoins。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">printJoins</span><span class="params">(List&lt;LogicalJoinNode&gt; js, </span></span><br><span class="line"><span class="params">                           PlanCache pc,</span></span><br><span class="line"><span class="params">                           Map&lt;String, TableStats&gt; stats,</span></span><br><span class="line"><span class="params">                           Map&lt;String, Double&gt; selectivities)</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>这种方法可以用来显示连接计划的图形表示（例如，当通过优化器的”-explain “选项设置 “explain “标志时）。</p>
+</li>
+<li><p>第四，我们提供了一个PlanCache类，可以用来缓存到目前为止在你的Selinger实现中所考虑的连接子集的最佳方式（使用computeCostAndCardOfSubplan需要这个类的一个实例）。</p>
+</li>
+<li><p>在JoinOptimizer.java中，实现方法orderJoins。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;LogicalJoinNode&gt; <span class="title function_">orderJoins</span><span class="params">(Map&lt;String, TableStats&gt; stats, </span></span><br><span class="line"><span class="params">                   Map&lt;String, Double&gt; filterSelectivities,  </span></span><br><span class="line"><span class="params">                   <span class="type">boolean</span> explain)</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这个方法应该在joins类成员上操作，返回一个新的List，这个List指定了应该进行的连接的顺序。这个列表中的第0项表示左深计划中最左、最底的连接。返回的列表中相邻的连接应该至少共享一个字段，以确保计划是左深的。这里stats是一个对象，让你找到出现在查询的FROM列表中的给定表名的TableStats。 filterSelectivities让你找到表的任何谓词的选择性；它保证在FROM列表中的每个表名有一个条目。最后，explain指定了你应该输出一个连接顺序的表示，以供参考。</li>
+<li>你可能希望使用上面描述的辅助方法和类来帮助你实现。大致上，你的实现应该遵循上面的假设代码，通过子集大小、子集和子集的子计划进行循环，调用computeCostAndCardOfSubplan并建立一个PlanCache对象来存储执行每个子集连接的最小成本方式。</li>
+</ul>
+<h3 id="c-实现目标-3"><a href="#c-实现目标-3" class="headerlink" title="c. 实现目标"></a>c. 实现目标</h3><ul>
+<li>通过单元测试 JoinOptimizerTest </li>
+<li>通过系统测试 QueryTest</li>
+</ul>
+<h2 id="5-Bonus-Exercises"><a href="#5-Bonus-Exercises" class="headerlink" title="5. *Bonus Exercises"></a>5. *Bonus Exercises</h2><h3 id="a-添加代码以执行更高级的连接心率估计"><a href="#a-添加代码以执行更高级的连接心率估计" class="headerlink" title="a. 添加代码以执行更高级的连接心率估计"></a>a. 添加代码以执行更高级的连接心率估计</h3><ul>
+<li>与其使用简单的启发式方法来估计连接的cardinality，不如设计一个更复杂的算法。</li>
+<li>一种选择是在每对表t1和t2中的每对属性a和b之间使用联合直方图。这个想法是创建a的桶，对于a的每个桶A，创建一个与A中a值共同出现的b值的直方图。</li>
+<li>另一种估计连接的cardinality的方法是假设小表中的每个值在大表中都有一个匹配的值。那么连接选择性的公式将是。1&#x2F;(Max(num-distinct(t1, column1), num-distinct(t2, column2))）。这里，列1和列2是连接属性。连接的cardinality是t1和t2的cardinality乘以选择性的产物。</li>
+</ul>
+<h3 id="b-改进子集迭代器"><a href="#b-改进子集迭代器" class="headerlink" title="b. 改进子集迭代器"></a>b. 改进子集迭代器</h3><ul>
+<li>我们对enumerateSubsets的实现是相当低效的，因为它在每次调用时都会创建大量的Java对象。</li>
+<li>在这个奖励练习中，你将提高enumerateSubsets的性能，这样你的系统就可以对有20个或更多连接的计划进行查询优化（目前这样的计划需要几分钟或几小时来计算）。</li>
+</ul>
+<h3 id="c-一个考虑到缓存的成本模型"><a href="#c-一个考虑到缓存的成本模型" class="headerlink" title="c. 一个考虑到缓存的成本模型"></a>c. 一个考虑到缓存的成本模型</h3><ul>
+<li>估计扫描和连接成本的方法没有考虑到缓冲池中的缓存。你应该扩展成本模型以考虑到缓存效应。这很棘手，因为由于迭代器模型，多个连接是同时运行的，所以可能很难预测使用我们在以前的实验中实现的简单缓冲池，每个人可以获得多少内存。</li>
+</ul>
+<h3 id="d-改进的连接算法和算法选择"><a href="#d-改进的连接算法和算法选择" class="headerlink" title="d. 改进的连接算法和算法选择"></a>d. 改进的连接算法和算法选择</h3><ul>
+<li>我们目前的成本估算和连接运算符选择算法（见JoinOptimizer.java中的instantiateJoin()）只考虑嵌套循环的连接。扩展这些方法以使用一个或多个额外的连接算法（例如，使用HashMap的某种形式的内存散列）。</li>
+</ul>
+<h3 id="e-Bushy-plans"><a href="#e-Bushy-plans" class="headerlink" title="e. Bushy plans"></a>e. Bushy plans</h3><ul>
+<li>改进所提供的orderJoins()和其他辅助方法，以生成bushy joins。我们的查询计划生成和可视化算法完全能够处理繁忙的计划；例如，如果orderJoins()返回列表(t1 join t2; t3 join t4; t2 join t3)，这将对应于一个繁忙的计划，(t2 join t3)节点在顶部。</li>
+</ul>
+</div><div class="article-licensing box"><div class="licensing-title"><p>SimpleDB-Lab3</p><p><a href="http://hyeee.me/2023/12/04/SimpleDB-Lab3/">http://hyeee.me/2023/12/04/SimpleDB-Lab3/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Hyeee</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2023-12-04</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2023-12-04</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Java/">Java</a><a class="link-muted mr-2" rel="tag" href="/tags/DataBase/">DataBase</a></div><!--!--></article></div><!--!--><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2023/12/08/SimpleDB-Lab4/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">SimpleDB-Lab4</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2023/11/05/SimpleDB-Lab2/"><span class="level-item">SimpleDB-Lab2</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><!--!--></div><div class="column column-left is-4-tablet is-4-desktop is-4-widescreen  order-1 is-sticky"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-14T13:25:26.000Z">2024-02-14</time></p><p class="title"><a href="/2024/02/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E7%9F%A5%E8%AF%86%E7%82%B9%E6%95%B4%E7%90%86/">计算机网络知识点整理</a></p><p class="categories"><a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/">计算机基础</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2024-02-02T07:32:46.000Z">2024-02-02</time></p><p class="title"><a href="/2024/02/02/Icarus%E4%B8%BB%E9%A2%98%E7%BE%8E%E5%8C%96/">Icarus主题美化</a></p><p class="categories"><a href="/categories/%E5%85%B6%E4%BB%96/">其他</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-22T14:25:46.000Z">2023-12-22</time></p><p class="title"><a href="/2023/12/22/SimpleDB-Lab6/">SimpleDB-Lab6</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-14T14:25:46.000Z">2023-12-14</time></p><p class="title"><a href="/2023/12/14/SimpleDB-Lab5/">SimpleDB-Lab5</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2023-12-08T14:25:46.000Z">2023-12-08</time></p><p class="title"><a href="/2023/12/08/SimpleDB-Lab4/">SimpleDB-Lab4</a></p><p class="categories"><a href="/categories/%E9%A1%B9%E7%9B%AE/">项目</a></p></div></article></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/%E5%85%B6%E4%BB%96/"><span class="level-start"><span class="level-item">其他</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/%E6%A1%86%E6%9E%B6/"><span class="level-start"><span class="level-item">框架</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E7%AE%97%E6%B3%95%E5%AF%BC%E8%AE%BA/"><span class="level-start"><span class="level-item">算法导论</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9F%BA%E7%A1%80/"><span class="level-start"><span class="level-item">计算机基础</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/%E8%AF%AD%E8%A8%80/"><span class="level-start"><span class="level-item">语言</span></span><span class="level-end"><span class="level-item tag">6</span></span></a></li><li><a class="level is-mobile" href="/categories/%E9%A1%B9%E7%9B%AE/"><span class="level-start"><span class="level-item">项目</span></span><span class="level-end"><span class="level-item tag">10</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/C/"><span class="tag">C#</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/C/"><span class="tag">C++</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/DataBase/"><span class="tag">DataBase</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Django/"><span class="tag">Django</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">8</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JavaScript/"><span class="tag">JavaScript</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Lombok/"><span class="tag">Lombok</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MyBatis/"><span class="tag">MyBatis</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MySQL/"><span class="tag">MySQL</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spring/"><span class="tag">Spring</span><span class="tag">4</span></a></div><div class="control"><a class="tags has-addons" href="/tags/c/"><span class="tag">c++</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/git/"><span class="tag">git</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/maven/"><span class="tag">maven</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/nexo/"><span class="tag">nexo</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E8%AE%A1%E7%BD%91/"><span class="tag">计网</span><span class="tag">1</span></a></div></div></div></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2024/02/"><span class="level-start"><span class="level-item">二月 2024</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/12/"><span class="level-start"><span class="level-item">十二月 2023</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/11/"><span class="level-start"><span class="level-item">十一月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/10/"><span class="level-start"><span class="level-item">十月 2023</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/09/"><span class="level-start"><span class="level-item">九月 2023</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/08/"><span class="level-start"><span class="level-item">八月 2023</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/05/"><span class="level-start"><span class="level-item">五月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/04/"><span class="level-start"><span class="level-item">四月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2023/02/"><span class="level-start"><span class="level-item">二月 2023</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/08/"><span class="level-start"><span class="level-item">八月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/02/"><span class="level-start"><span class="level-item">二月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/01/"><span class="level-start"><span class="level-item">一月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/12/"><span class="level-start"><span class="level-item">十二月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/09/"><span class="level-start"><span class="level-item">九月 2020</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/04/"><span class="level-start"><span class="level-item">四月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/12/"><span class="level-start"><span class="level-item">十二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/05/"><span class="level-start"><span class="level-item">五月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/04/"><span class="level-start"><span class="level-item">四月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2019/02/"><span class="level-start"><span class="level-item">二月 2019</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></div></div></div></div><!--!--></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo_pikachu.svg" alt="Hyeee&#039;s Home" height="28"></a><p class="is-size-7"><span>&copy; 2024 Hyeee</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-cn");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
